@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GREAT MINDS - RGN Exam Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Sora',sans-serif;background:#0a0f1e;color:#f1f5f9;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(59,130,246,.09) 0%,transparent 65%),radial-gradient(ellipse 60% 60% at 80% 90%,rgba(6,182,212,.06) 0%,transparent 65%);pointer-events:none;z-index:0;}
+.screen{display:none;min-height:100vh;position:relative;z-index:1;flex-direction:column;}
+.screen.active{display:flex;}
+.page{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;}
+.card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:30px 24px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+.brand{text-align:center;margin-bottom:28px;}
+.brand-icon{width:76px;height:76px;border-radius:20px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 14px;box-shadow:0 0 40px rgba(59,130,246,.4);}
+.brand-name{font-size:24px;font-weight:700;}
+.brand-tag{font-size:12px;color:#94a3b8;margin-top:4px;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;}
+.role-btn{padding:24px 12px;border-radius:16px;border:2px solid rgba(255,255,255,.08);background:#1a2235;cursor:pointer;text-align:center;transition:all .2s;user-select:none;}
+.role-btn:active{transform:scale(.97);}
+.role-btn.picked{border-color:#3b82f6;background:rgba(59,130,246,.12);}
+.role-icon{font-size:30px;margin-bottom:10px;}
+.role-name{font-size:14px;font-weight:600;}
+.role-desc{font-size:11px;color:#94a3b8;margin-top:3px;}
+.card-title{font-size:19px;font-weight:700;margin-bottom:5px;}
+.card-sub{font-size:13px;color:#94a3b8;margin-bottom:22px;line-height:1.6;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;}
+.field input,.field select{width:100%;padding:14px 16px;background:#1a2235;border:1.5px solid rgba(255,255,255,.08);border-radius:12px;color:#f1f5f9;font-family:'Sora',sans-serif;font-size:14px;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;}
+.field input:focus,.field select:focus{border-color:#3b82f6;}
+.field .mono{font-family:'JetBrains Mono',monospace;letter-spacing:.1em;}
+.sel-wrap{position:relative;}
+.sel-wrap::after{content:'\25BE';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none;}
+.btn{display:block;width:100%;padding:15px;background:linear-gradient(135deg,#3b82f6,#06b6d4);border:none;border-radius:12px;color:#fff;font-family:'Sora',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.3);transition:opacity .2s,transform .1s;margin-top:6px;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:none;}
+.btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.1);box-shadow:none;color:#94a3b8;}
+.btn-sm{padding:9px 16px;font-size:13px;width:auto;display:inline-block;}
+.back-link{text-align:center;margin-top:16px;font-size:13px;color:#64748b;cursor:pointer;}
+.err{display:none;font-size:12px;color:#ef4444;margin-top:10px;padding:10px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;text-align:center;}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(10,15,30,.97);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
+.top-left .tl{font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.06em;}
+.top-left .tn{font-size:13px;font-weight:600;margin-top:1px;}
+.timer{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:#10b981;line-height:1;transition:color .3s;}
+.timer.warn{color:#f59e0b;}
+.timer.danger{color:#ef4444;animation:blink 1s infinite;}
+.timer-sub{font-size:10px;color:#475569;margin-top:2px;}
+.prog-bar{height:4px;background:#1a2235;border-radius:4px;overflow:hidden;width:66px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#06b6d4);border-radius:4px;transition:width .3s;}
+.prog-txt{font-size:10px;color:#94a3b8;margin-top:4px;text-align:right;}
+.exam-body{flex:1;overflow-y:auto;padding:20px 16px 100px;max-width:680px;width:100%;margin:0 auto;}
+.topic-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
+.q-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px;}
+.q-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;}
+.q-no{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;flex-shrink:0;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.q-txt{font-size:14px;line-height:1.7;}
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt{display:flex;gap:12px;align-items:center;padding:13px 15px;background:#1a2235;border:1.5px solid rgba(255,255,255,.07);border-radius:12px;cursor:pointer;font-size:13px;color:#94a3b8;line-height:1.5;transition:all .15s;user-select:none;}
+.opt:hover{border-color:#3b82f6;color:#f1f5f9;background:rgba(59,130,246,.07);}
+.opt.sel{border-color:#3b82f6;background:rgba(59,130,246,.13);color:#f1f5f9;}
+.opt-l{width:27px;height:27px;border-radius:7px;background:#0f172a;border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0;transition:all .15s;}
+.opt.sel .opt-l{background:#3b82f6;border-color:#3b82f6;color:#fff;}
+.q-footer{text-align:center;font-size:11px;color:#475569;margin-top:10px;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:20;background:rgba(10,15,30,.98);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.07);padding:12px 16px;}
+.bottom-nav-inner{display:flex;gap:10px;max-width:680px;margin:0 auto;}
+.bottom-nav-inner .btn{flex:1;padding:12px;font-size:13px;margin-top:0;}
+.results-body{flex:1;overflow-y:auto;padding:24px 16px 40px;max-width:680px;width:100%;margin:0 auto;}
+.result-hero{text-align:center;padding:30px 20px 24px;background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:20px;margin-bottom:16px;}
+.ring-wrap{width:110px;height:110px;margin:0 auto 16px;position:relative;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-wrap circle{fill:none;stroke-width:9;stroke-linecap:round;}
+.ring-bg{stroke:#1a2235;}
+.ring-fill{transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1);}
+.ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;font-weight:700;}
+.ring-num small{font-size:10px;color:#94a3b8;font-weight:400;margin-top:1px;}
+.res-name{font-size:18px;font-weight:700;margin-bottom:6px;}
+.r-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px;}
+.r-pass{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);}
+.r-fail{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.sbox{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 10px;text-align:center;}
+.sbox-v{font-size:24px;font-weight:700;}
+.sbox-l{font-size:10px;color:#94a3b8;margin-top:3px;}
+.sec-hd{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;margin-top:6px;}
+.lb-row{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:11px;margin-bottom:7px;}
+.lb-row.me{border-color:#3b82f6;background:rgba(59,130,246,.07);}
+.lb-rank{font-family:'JetBrains Mono',monospace;font-size:13px;width:26px;text-align:center;flex-shrink:0;}
+.lb-name{flex:1;font-size:13px;font-weight:500;}
+.lb-bar-w{width:52px;flex-shrink:0;}
+.lb-bar{height:4px;background:#1a2235;border-radius:4px;overflow:hidden;}
+.lb-bar-f{height:100%;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4);}
+.lb-pct{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;min-width:36px;text-align:right;}
+.rev-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:10px;}
+.rev-opt{padding:8px 12px;border-radius:8px;font-size:12px;display:flex;gap:8px;margin-bottom:5px;border:1px solid transparent;line-height:1.5;}
+.admin-top{background:#111827;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.admin-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.admin-body{flex:1;overflow-y:auto;padding:18px 16px 36px;max-width:900px;width:100%;margin:0 auto;}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.sum-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;}
+.sum-v{font-size:26px;font-weight:700;margin-bottom:3px;}
+.sum-l{font-size:11px;color:#94a3b8;}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.f-btn{padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:#1a2235;color:#94a3b8;font-size:12px;cursor:pointer;font-family:'Sora',sans-serif;transition:all .15s;}
+.f-btn.on{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#f1f5f9;}
+.tbl-wrap{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;}
+.tbl-head{display:grid;grid-template-columns:34px 1fr 76px 68px 52px 60px;gap:8px;padding:11px 14px;background:#1a2235;border-bottom:1px solid rgba(255,255,255,.07);}
+.tbl-head span{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;}
+.tbl-row{display:grid;grid-template-columns:34px 1fr 76px 68px 52px 60px;gap:8px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;}
+.tbl-row:last-child{border-bottom:none;}
+@media(max-width:400px){
+  .tbl-head,.tbl-row{grid-template-columns:28px 1fr 62px 54px 44px;}
+  .tbl-head span:last-child,.t-time{display:none;}
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{animation:slideIn .3s ease both;}
+
+/* WATERMARK */
+.watermark{
+  position:fixed;inset:0;pointer-events:none;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.watermark-inner{
+  position:absolute;inset:-50%;
+  display:flex;flex-wrap:wrap;align-content:flex-start;
+  gap:0;
+}
+.wm-text{
+  font-size:13px;font-weight:600;
+  color:rgba(255,255,255,0.045);
+  white-space:nowrap;padding:28px 18px;
+  transform:rotate(-35deg);
+  letter-spacing:.05em;
+  user-select:none;-webkit-user-select:none;
+}
+
+/* ===== WATERMARK ===== */
+.watermark{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:9999;overflow:hidden;
+}
+.watermark-text{
+  position:absolute;color:rgba(255,255,255,0.06);
+  font-family:'Sora',sans-serif;font-size:18px;font-weight:700;
+  white-space:nowrap;transform:rotate(-35deg);user-select:none;
+  letter-spacing:2px;text-transform:uppercase;
+}
+
+/* ===== FLAG PANEL ===== */
+.flag-bar{
+  background:#0f172a;border-bottom:1px solid rgba(255,255,255,.07);
+  padding:8px 16px;display:flex;align-items:center;gap:8px;
+  overflow-x:auto;flex-shrink:0;min-height:48px;
+  scrollbar-width:none;
+}
+.flag-bar::-webkit-scrollbar{display:none;}
+.flag-bar-label{
+  font-size:10px;font-weight:700;color:#475569;
+  text-transform:uppercase;letter-spacing:.08em;
+  white-space:nowrap;flex-shrink:0;
+}
+.flag-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);
+  color:#f59e0b;font-size:11px;font-weight:600;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.flag-chip:hover{background:rgba(245,158,11,.25);}
+.flag-chip .fc-x{
+  font-size:13px;font-weight:700;color:#f59e0b;
+  margin-left:2px;opacity:.7;
+}
+.flag-empty{
+  font-size:11px;color:#334155;font-style:italic;
+}
+
+/* ===== FLAG BUTTON ON QUESTION ===== */
+.flag-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:10px;
+  border:1.5px solid rgba(255,255,255,.08);
+  background:#1a2235;color:#94a3b8;
+  font-family:'Sora',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;margin-top:14px;
+  -webkit-tap-highlight-color:transparent;
+}
+.flag-btn.flagged{
+  border-color:rgba(245,158,11,.5);
+  background:rgba(245,158,11,.1);color:#f59e0b;
+}
+.flag-btn .flag-icon{font-size:15px;}
+
+/* ===== QUESTION NAV GRID ===== */
+.q-nav-panel{
+  background:#0f172a;border-top:1px solid rgba(255,255,255,.07);
+  padding:10px 16px;flex-shrink:0;
+}
+.q-nav-grid{
+  display:flex;flex-wrap:wrap;gap:6px;
+  max-width:680px;margin:0 auto;
+}
+.q-nav-dot{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  cursor:pointer;border:1.5px solid rgba(255,255,255,.08);
+  background:#1a2235;color:#475569;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+}
+.q-nav-dot.answered{background:rgba(59,130,246,.2);border-color:#3b82f6;color:#93c5fd;}
+.q-nav-dot.flagged{background:rgba(245,158,11,.15);border-color:#f59e0b;color:#f59e0b;}
+.q-nav-dot.current{background:#3b82f6;border-color:#3b82f6;color:#fff;transform:scale(1.1);}
+.q-nav-dot.answered.flagged{background:rgba(245,158,11,.2);border-color:#f59e0b;color:#f59e0b;}
+
+/* adjust exam body to accommodate panels */
+.exam-scroll{padding-bottom:160px !important;}
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: HOME -->
+<div id="s1" class="screen">
+  <div class="page">
+    <div class="brand">
+      <div class="brand-icon">&#x1F9E0;</div>
+      <div class="brand-name">GREAT MINDS</div>
+      <div class="brand-tag">RGN Exam Portal &middot; KNUST 2026</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Welcome &#x1F44B;</div>
+      <div class="card-sub">Select your role below then tap <strong>Continue</strong>.</div>
+      <div class="role-grid">
+        <div class="role-btn" id="rb_s" onclick="pickRole('student')">
+          <div class="role-icon">&#x1F4DA;</div>
+          <div class="role-name">Student</div>
+          <div class="role-desc">Take an exam</div>
+        </div>
+        <div class="role-btn" id="rb_a" onclick="pickRole('admin')">
+          <div class="role-icon">&#x1F6E1;&#xFE0F;</div>
+          <div class="role-name">Admin</div>
+          <div class="role-desc">View dashboard</div>
+        </div>
+      </div>
+      <button class="btn" id="cont1" onclick="gotoLogin()" disabled>Continue &#x2192;</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: LOGIN -->
+<div id="s2" class="screen">
+  <div class="page">
+    <div class="brand">
+      <div class="brand-icon">&#x1F9E0;</div>
+      <div class="brand-name">GREAT MINDS</div>
+    </div>
+    <div class="card">
+      <div id="fStudent">
+        <div class="card-title">Student Login</div>
+        <div class="card-sub">Enter your name, select your paper and enter the course password.</div>
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="iName" placeholder="e.g. Abena Mensah" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>Select Course / Paper</label>
+          <div class="sel-wrap">
+            <select id="iCourse">
+              <option value="">&#x2014; Choose your paper &#x2014;</option>
+              <option value="DSSN114">DSSN 114 &middot; Medical-Surgical Nursing</option>
+              <option value="DSSN112">DSSN 112 &middot; Public Health &amp; Mental Health</option>
+              <option value="DSGN116">DSGN 116 &middot; Obstetrics &amp; Paediatrics</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Exam Password</label>
+          <input type="password" id="iPass" class="mono" placeholder="Course password" autocomplete="off">
+        </div>
+      </div>
+      <div id="fAdmin" style="display:none;">
+        <div class="card-title">Admin Login</div>
+        <div class="card-sub">Enter the admin password to access your dashboard.</div>
+        <div class="field">
+          <label>Admin Password</label>
+          <input type="password" id="iAdminPass" class="mono" placeholder="Admin password" autocomplete="off">
+        </div>
+      </div>
+      <div class="err" id="loginErr"></div>
+      <button class="btn" onclick="doLogin()">Login &#x2192;</button>
+      <div class="back-link" onclick="goto('s1')">&#x2190; Back</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: EXAM -->
+<div id="s3" class="screen">
+  
+  <div class="watermark" id="examWatermark"></div>
+  <div class="topbar">
+    <div class="top-left">
+      <div class="tl">Candidate</div>
+      <div class="tn" id="topName"></div>
+    </div>
+    <div style="text-align:center;">
+      <div class="timer" id="timerEl">30:00</div>
+      <div class="timer-sub">remaining</div>
+    </div>
+    <div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+      <div class="prog-txt" id="progTxt">0/60</div>
+    </div>
+  </div>
+  <div class="watermark" id="wmLayer"><div class="watermark-inner" id="wmInner"></div></div>
+  <!-- FLAG BAR -->
+  <div class="flag-bar" id="flagBar">
+    <span class="flag-bar-label">&#x1F6A9; Flagged:</span>
+    <span class="flag-empty" id="flagEmpty">None yet</span>
+  </div>
+
+  <div class="exam-body" id="examBody"></div>
+
+  <!-- QUESTION NAV GRID -->
+  <div class="q-nav-panel" id="qNavPanel">
+    <div class="q-nav-grid" id="qNavGrid"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="btn btn-outline" id="btnPrev" onclick="nav(-1)">&#x2190; Prev</button>
+      <button class="btn" id="btnNext" onclick="nav(1)">Next &#x2192;</button>
+      <button class="btn btn-danger" id="btnSubmit" style="display:none;" onclick="confirmSubmit()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: RESULTS -->
+<div id="s4" class="screen">
+  <div class="watermark" id="wmLayer2"><div class="watermark-inner" id="wmInner2"></div></div>
+  
+  <div class="watermark" id="resultsWatermark"></div>
+  <div class="results-body">
+    <div class="result-hero">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 110 110" width="110" height="110">
+          <circle class="ring-bg" cx="55" cy="55" r="46"/>
+          <circle class="ring-fill" id="ringArc" cx="55" cy="55" r="46" stroke-dasharray="289" stroke-dashoffset="289" stroke="#3b82f6"/>
+        </svg>
+        <div class="ring-num" id="ringNum">0%<small>score</small></div>
+      </div>
+      <div class="res-name" id="resName"></div>
+      <div class="r-badge" id="resBadge"></div>
+      <p style="font-size:13px;color:#94a3b8;line-height:1.6;max-width:300px;margin:0 auto;" id="resMsg"></p>
+    </div>
+    <div class="stats-row">
+      <div class="sbox"><div class="sbox-v" id="stC" style="color:#10b981">0</div><div class="sbox-l">Correct</div></div>
+      <div class="sbox"><div class="sbox-v" id="stW" style="color:#ef4444">0</div><div class="sbox-l">Wrong</div></div>
+      <div class="sbox"><div class="sbox-v" id="stS" style="color:#f59e0b">0</div><div class="sbox-l">Skipped</div></div>
+    </div>
+    <div class="sec-hd">&#x1F3C6; Rankings &mdash; <span id="lbLabel"></span></div>
+    <div id="lbDiv" style="margin-bottom:18px;"></div>
+    <div class="sec-hd">&#x1F4CB; Question Review</div>
+    <div id="revDiv"></div>
+  </div>
+</div>
+
+<!-- SCREEN 5: ADMIN -->
+<div id="s5" class="screen">
+  <div class="admin-top">
+    <div style="display:flex;align-items:center;gap:11px;">
+      <div class="admin-logo">&#x1F6E1;&#xFE0F;</div>
+      <div>
+        <div style="font-size:15px;font-weight:600;">Admin Dashboard</div>
+        <div style="font-size:11px;color:#94a3b8;">GREAT MINDS &middot; RGN Exam Portal</div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="adminOut()">Logout</button>
+  </div>
+  <div class="admin-body">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:11px;color:#475569;" id="lastRefresh">Loading...</div>
+      <button onclick="refreshAdmin()" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:#1a2235;color:#94a3b8;font-size:12px;cursor:pointer;font-family:'Sora',sans-serif;">&#x1F504; Refresh</button>
+    </div>
+    <div class="sum-grid" id="adminSum"></div>
+    <div class="filter-row">
+      <button class="f-btn on" data-f="ALL" onclick="filterA('ALL')">All Papers</button>
+      <button class="f-btn" data-f="DSSN114" onclick="filterA('DSSN114')">DSSN 114</button>
+      <button class="f-btn" data-f="DSSN112" onclick="filterA('DSSN112')">DSSN 112</button>
+      <button class="f-btn" data-f="DSGN116" onclick="filterA('DSGN116')">DSGN 116</button>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <span>#</span><span>Name</span><span>Paper</span><span>Score</span><span>Status</span><span>Time</span>
+      </div>
+      <div id="adminTbl"></div>
+    </div>
+    <p style="font-size:11px;color:#475569;text-align:center;margin-top:14px;">Screenshot this page to save results. Data stored on this device.</p>
+  </div>
+</div>
+
+<script>
+var PW = {ADMIN:'ADMIN@GREATMINDS2026',DSSN114:'MEDSURG2026',DSSN112:'PUBMENTALHEALTH2026',DSGN116:'OBSPEDS2026'};
+var PASS_MARK = 50;
+var EXAM_SECS = 30 * 60;
+
+var QB = {DSSN114:[{q:"Varicose veins can recur in other veins after surgery. What types of veins are commonly varicose?",opts:["Calf veins","Lesser saphenous veins","Reticular veins","Spider veins"],a:1,t:"Vascular"},{q:"When a thrombus develops initially in the veins as a result of stasis or hypercoagulability but without inflammation, the process is referred to as:",opts:["Deep vein thrombosis","Phlebothrombosis","Thrombophlebitis","Venous thrombosis"],a:1,t:"Vascular"},{q:"In constrictive pericarditis, the inflammation of the pericardium is characterized by all the following EXCEPT?",opts:["Contracture","Kussmaul's sign","Scarring","Thickening"],a:1,t:"Cardiac"},{q:"The Virchow's triad plays a significant role in the development of DVT. They include Hypercoagulability, Drug usage, Venous stasis, and Vessel wall injury. Which combination is correct?",opts:["I and III","I II and III","I II and IV","I III and IV"],a:3,t:"Vascular"},{q:"The nurse can best explain positive Pratt's sign of a person suffering from DVT by saying there is:",opts:["Calf pain associated with dorsiflexion of the leg","Calf pain associated with walking","Pain that occurs with squeezing the calf","Pain with abduction of the limb"],a:2,t:"Vascular"},{q:"The type of non-small lung carcinoma that develops from mucus producing glandular cells is?",opts:["Adenocarcinoma","Large cell carcinoma","Small cell carcinoma","Squamous cell carcinoma"],a:0,t:"Respiratory"},{q:"Parts of the abdominal hernia may include all the following EXCEPT?",opts:["Body","Content","Neck","Omphalocele"],a:3,t:"Abdominal Surgery"},{q:"Fractures of the lower ribs are associated with injury to which organs?",opts:["Diaphragm and stomach","Kidneys and liver","Lungs and heart","Spleen and liver"],a:3,t:"Trauma"},{q:"A trauma client shows left side of chest moves inward when inhaling. This finding is suggestive of:",opts:["Flail chest","Mediastinal shift","Pneumothorax","Pulmonary contusion"],a:0,t:"Respiratory"},{q:"All the following are signs and symptoms of late lung cancer EXCEPT?",opts:["Dysphagia","Dyspnea","Facial paralysis","Joint pain"],a:3,t:"Respiratory"},{q:"A volvulus can be explained as:",opts:["A loop of bowels causing obstruction","A protrusion of an organ through the walls that contains it","Telescoping of a proximal loop of bowel into a distal loop causing obstruction","Twisting of a loop of bowels causing obstruction"],a:3,t:"GI Surgery"},{q:"In appendicitis pain is felt in the right lower quadrant when the left lower quadrant is palpated. This is known as?",opts:["Brudzinski's sign","McBurney's point","Rebound tenderness","Rovsing's sign"],a:3,t:"GI Surgery"},{q:"Which of the following may be a manifestation of a duodenal ulcer?",opts:["Vomiting after meals","Hematemesis","Pain relieved by food ingestion","Pain half hour after meals"],a:2,t:"GI Surgery"},{q:"The nurse is assessing a patient for constipation. Which review should be conducted first to identify the cause?",opts:["Activity levels","Alcohol consumption","Current medication","Usual pattern of elimination"],a:2,t:"GI Surgery"},{q:"The nurse understands that the diagnosis of oral cancer is confirmed with?",opts:["Biopsy","Gram Stain","Oral culture","Oral washings for cytology"],a:0,t:"Oncology"},{q:"Which lab study should be done periodically if the client is taking warfarin sodium?",opts:["Blood glucose","Erythrocyte count","Stool specimen for occult blood","White blood cell count"],a:2,t:"Pharmacology"},{q:"In managing a patient with constrictive pericarditis the goal of the nurse is to:",opts:["Control pain","Improve heart function","Prevent dyspnea","Reduce edema"],a:1,t:"Cardiac"},{q:"Surgery for inguinal hernia is recommended to?",opts:["Decrease secretion of bile salts","Increase intestinal motility","Prevent strangulation of the bowel","Prevent malabsorptive disorders"],a:2,t:"Abdominal Surgery"},{q:"In managing a patient with varicose veins which lifestyle change would you NOT recommend?",opts:["Avoid wearing high heels for long periods","Engage in physical activities","Use of compression stockings","Wear tight clothing only in the day"],a:3,t:"Vascular"},{q:"Which medication would NOT be recommended for managing DVT in a pregnant woman?",opts:["Low molecular weight heparin","Staphylokinase","Standard heparin","Warfarin"],a:3,t:"Vascular"},{q:"Which type of cancer is strongly related to cigarette smoking?",opts:["Adenocarcinoma","Large cell carcinoma","Non-small cell lung cancer","Small cell lung cancer"],a:3,t:"Respiratory"},{q:"The nurse assesses a patient for possible pulmonary embolism. The most frequent sign is?",opts:["Cough","Haemoptysis","Syncope","Tachypnea"],a:3,t:"Respiratory"},{q:"The client pulls out the chest tube. The nurse's initial action should be to?",opts:["Call the doctor","Cover the insertion site with Vaseline gauze","Order a chest x-ray","Reinsert the tube"],a:1,t:"Respiratory"},{q:"Air escaping from a laceration in the lung into the pleural space is known as?",opts:["Chylothorax","Spontaneous pneumothorax","Tension pneumothorax","Traumatic pneumothorax"],a:1,t:"Respiratory"},{q:"The nurse notes a penetrating abdominal wound with exposed viscera. The nurse should?",opts:["Apply a clean dressing","Cover the area with petroleum gauze","Cover exposed viscera with sterile saline gauze","Gently replace the abdominal contents"],a:2,t:"Abdominal Surgery"},{q:"As a result of a fractured rib the patient may develop?",opts:["Herniation of the diaphragm","Obstructive lung disease","Pneumothorax","Scoliosis"],a:2,t:"Trauma"},{q:"Following subtotal gastrectomy the patient develops dumping syndrome. The nurse explains this as?",opts:["Build-up of faeces and gas in the large intestine","Nausea due to a full stomach","Rapid passage of osmotic fluid into the jejunum","Reflex of intestinal contents into the esophagus"],a:2,t:"GI Surgery"},{q:"The organism commonly implicated in peptic ulcer disease is?",opts:["E.coli","Fusobacterium","Helicobacter pylori","Rotavirus"],a:2,t:"GI Surgery"},{q:"The commonest complication likely to occur in patients with DVT is?",opts:["Angina Pectoris","Oesophageal Atresia","Pulmonary Embolism","Thrombophlebitis"],a:2,t:"Vascular"},{q:"Which pulmonary condition creates its own cavitation?",opts:["Bronchogenic carcinoma","Emphysema","Empyema","Lung abscess"],a:3,t:"Respiratory"},{q:"A 2-year-old with suspected intussusception presents with which finding?",opts:["Currant jelly stools","Palpable mass over the flank","Projectile vomiting","Ribbon-like stools"],a:0,t:"GI Surgery"},{q:"A 40-year-old woman is admitted preoperatively for Myomectomy. The purpose is?",opts:["To identify problems that may increase operative risk and predispose to postoperative problems","To prevent problems that may increase operative risk","To reduce problems that may increase operative risk","To treat problems that may increase operative risk and predispose to postoperative problems"],a:0,t:"Perioperative"},{q:"Nursing activities during preoperative phase include all the following EXCEPT?",opts:["Assessment","Identification of actual or potential health problems","Identification of surgical complications","Plan of care based on individual health needs"],a:2,t:"Perioperative"},{q:"A patient took porridge before elective epigastric hernia repair. After how many hours can surgery be done?",opts:["3 hours","4 hours","5 hours","6 hours"],a:3,t:"Perioperative"},{q:"The nurse's intervention for haemorrhage from wound site after surgery is to?",opts:["Change dressings and soiled linen","Prepare and send patient back to theatre","Reinforce dressings and observe patient","Serve prescribed medication"],a:2,t:"Perioperative"},{q:"Deep-breathing exercises are effectively taught?",opts:["Intra operatively","Peri operatively","Post operatively","Pre operatively"],a:3,t:"Perioperative"},{q:"The main complaint of a patient with cancer of the prostate gland would be?",opts:["Dysuria","Oliguria","Retention of urine","Suppression of urine"],a:2,t:"Oncology"},{q:"A patient's mother refuses to sign the blood permit. The most appropriate nursing action is?",opts:["Encourage the mother to reconsider","Explain the consequences without treatment","Give the blood without permission","Notify the physician of the mother's refusal"],a:3,t:"Professional"},{q:"During the immediate postoperative period of pneumonectomy the highest priority is to?",opts:["Check vital signs every 15 minutes","Maintain a patent airway","Observe for haemorrhage","Record intake and output"],a:1,t:"Respiratory"},{q:"The most common symptom of esophageal disease is?",opts:["Dysphagia","Nausea","Odynophagia","Vomiting"],a:0,t:"GI Surgery"},{q:"In total gastrectomy with Billroth I the esophagus is anastomosed to the?",opts:["Colon","Duodenum","Jejunum","Stomach"],a:1,t:"GI Surgery"},{q:"The best time for preoperative teaching and education is?",opts:["Afternoon or evening before surgery","Morning or 4 hours before surgery","One week prior to surgery","Relatively close to the time of surgery"],a:3,t:"Perioperative"},{q:"Which statement about consent for surgery is INCORRECT?",opts:["Consent gives detailed information on nature and intention of surgery","Consent gives detailed information on possible alternative measures","Consent gives detailed information on risks and benefits of surgery","Consent gives detailed information on the right of surgeon to refuse surgery"],a:3,t:"Professional"},{q:"A nurse uses numbers 0-10 for pain assessment. What pain assessment tool is being used?",opts:["Numerical Rating Scale","Pain Faces Scale","Pain Ladder Scale","Visual Analogue Scale"],a:0,t:"Pain Management"},{q:"Palliative treatment surgery is performed to?",opts:["Cure the condition","Provide therapy","Relieve pain","Treat a disease"],a:2,t:"Oncology"},{q:"The presence of one or more gallstones in the common bile duct is referred to as?",opts:["Cholecystitis","Cholecystostomy","Cholelithiasis","Choledocholithiasis"],a:3,t:"GI Surgery"},{q:"Following repair of cleft palate the child needs to adhere to which diet?",opts:["Bland diet","Liquid diet","Smooth diet","Soft diet"],a:1,t:"GI Surgery"},{q:"The most common cause of intestinal obstruction is?",opts:["Adhesions","Hernias","Neoplasms","Volvulus"],a:0,t:"GI Surgery"},{q:"A post-operative patient expresses anxiety about upcoming surgery. Which response would stimulate further discussion?",opts:["Can you share with me your fears about surgery?","If it is any help anyone is nervous before surgery","I have explained the entire surgical procedure to you","Let me tell you about the amount of pain you can expect"],a:0,t:"Perioperative"},{q:"If barium enema and upper GI series are both ordered which should be done first?",opts:["Barium enema","Both at the same time","The one available at the earliest time","Upper GI series"],a:0,t:"GI Surgery"},{q:"Which diet saying is appropriate for a patient with peptic ulcer disease?",opts:["A diet that contains high fiber","Balanced diet","Diet that can be tolerated","Three regular meals"],a:2,t:"GI Surgery"},{q:"The most critical factor in immediate care of an infant after repair of cleft lip is?",opts:["Administration of drug to reduce secretion","Administration of IV infusion","Maintenance of patent airway","Prevention of vomiting"],a:2,t:"GI Surgery"},{q:"Which of the following is NOT a precipitating cause of hemorrhoids?",opts:["Constipation","Occlusion of arterial blood supply to the rectum","Prolonged sitting or standing","Pregnancy"],a:1,t:"GI Surgery"},{q:"Predisposing factors of appendicitis: Inadequate food intake, Kinking of appendix, Presence of faecalith, Repeated throat infection. Which combination is correct?",opts:["I and II only","II and III only","I II and IV only","II III and IV only"],a:3,t:"GI Surgery"},{q:"A patient returns from bronchoscopy and biopsy fully awake. The nurse should?",opts:["Advise the patient to cough frequently","Advise the patient to lie flat for 2 hours","Evaluate the presence of gag reflex","Provide ice chips to suck to reduce swelling"],a:2,t:"Respiratory"},{q:"On the 3rd day after laparotomy a patient complains of severe pains in the right calf muscle. The nurse should first?",opts:["Apply hot fomentation to the part","Elevate the leg above the heart","Notify the surgeon","Record the symptoms on the nurses notes"],a:2,t:"Vascular"},{q:"A patient who has had a colostomy should follow a diet that is?",opts:["As close to normal as possible","High in carbohydrates","Low in fiber content","Rich in protein"],a:0,t:"GI Surgery"},{q:"The main purpose of underwater sealed drainage system is to?",opts:["Drain air and blood from the pleural cavity","Drain air fluid and blood from the pleural cavity","Prevent air and fluid from entering the lung","Prevent air from entering the pleural cavity"],a:1,t:"Respiratory"},{q:"A patient going for abdominal operation should urinate immediately before the operation in order to?",opts:["Eliminate one source of post-operative discomfort","Permit better visualization of other viscera","Prevent injury to the bladder during surgery","Prevent voiding on the operating table"],a:2,t:"Perioperative"},{q:"A patient who has had a laparotomy returns from theatre. The nurse should assess for bleeding by?",opts:["Asking patient if her back feels wet","Assessing her level of consciousness","Checking the blood pressure","Examining dressing"],a:3,t:"Perioperative"},{q:"Evidence of fluid imbalance post-operatively: Patient complains of thirst, cracked lips, moisture in axillae, reduction in urinary output. Which is correct?",opts:["I II and III only","I II and IV only","II III and IV only","I II III and IV"],a:1,t:"Perioperative"},{q:"When there is a burst abdomen post-operatively: Cover with saline towel, Dress wound as usual, Inform surgeon, Push contents back gently. Which is correct?",opts:["I and II only","I and III only","II and III only","I II III and IV"],a:1,t:"Perioperative"},{q:"The catheter in the chest during underwater seal drainage is to: drain blood and serum, facilitate lung re-expansion, liquefy bronchial secretions, prevent drying of bronchial mucosa. Which is correct?",opts:["I and II only","II and IV only","I II and III only","II III and IV"],a:0,t:"Respiratory"},{q:"The most comfortable position for patient with acute appendicitis is?",opts:["Lying absolutely on the back","Lying on the side with right knee bent","Prone with head turned to one side","Sitting upright in a chair"],a:1,t:"GI Surgery"},{q:"An obese post-laparotomy patient has DVT. One sign of this condition is?",opts:["Leg size diameter may be reduced","Onset is sudden","Skin temperature is cold","Superficial veins appear enlarged and prominent"],a:3,t:"Vascular"},{q:"Signs indicating tension pneumothorax is developing include?",opts:["Decreased movement and diminished breath sounds on affected side","Dull percussion sounds on injured side","Muffled and distant heart sounds with decreasing blood pressure","Severe respiratory distress and tracheal deviation"],a:3,t:"Respiratory"},{q:"To prevent airway obstruction in the unconscious or semiconscious postoperative patient the nurse?",opts:["Administers oxygen per mask","Elevates the head of the bed","Encourages deep breathing","Positions the patient in a side-lying position"],a:3,t:"Perioperative"},{q:"When assessing pain in a patient with suspected appendicitis the nurse expects pain at?",opts:["Rebound tenderness at Bartomier's point","Rebound tenderness at Sitkovsky's point","Rebound tenderness at Dunphy's point","Rebound tenderness at McBurney's point"],a:3,t:"GI Surgery"},{q:"Master Daniel has severe abdominal pain in the right lower quadrant. Nurse Ann should avoid which actions before diagnosis?",opts:["Complete assessment including lower abdominal palpation","Enemas and analgesics","Enemas and sips of water","Sips of water and analgesic"],a:1,t:"GI Surgery"},{q:"A characteristic Olive mass is identified in patients diagnosed with?",opts:["Appendicitis","Diverticular disease","Intussusception","Pyloric stenosis"],a:3,t:"GI Surgery"},{q:"The development of intussusception is associated with which risk factor?",opts:["Bronchogenic carcinoma","Immunosuppressive state","Pre-existing congenital anomaly","Rotavirus infection"],a:3,t:"GI Surgery"},{q:"When caring for a patient with intestinal obstruction the following are to be considered EXCEPT?",opts:["Antiemetics","Energy balance","Fluid and electrolyte imbalance","Pain management"],a:1,t:"GI Surgery"},{q:"Telescoping of a loop of bowel usually results in which type of intestinal obstruction?",opts:["Closed loop","Functional","Ileus","Mechanical"],a:3,t:"GI Surgery"},{q:"Patient who had gastric surgery involving the antrum is likely to suffer from?",opts:["Vitamin A deficiency","Vitamin B6 deficiency","Vitamin B12 deficiency","Vitamin C deficiency"],a:2,t:"GI Surgery"},{q:"When assessing a patient with right indirect inguinal hernia the nurse expects to find?",opts:["A lump in the obturator foramen","A lump in the right scrotum","An irreducible bulge at the right femoral region","Bulge from the posterior wall of the inguinal canal"],a:1,t:"Abdominal Surgery"},{q:"Palpable sausage mass is characteristically identified in which condition?",opts:["Appendicitis","Intussusception","Pyloric stenosis","Volvulus"],a:1,t:"GI Surgery"},{q:"The nurse best assesses positive Dunphy's sign by?",opts:["Allowing the patient to cough","Allowing patient to lie on the left side","Palpate the right iliac region while patient lies on the left","Pressing McBurney's point to elicit rebound tenderness"],a:0,t:"GI Surgery"},{q:"A priority post-operative nursing diagnosis after appendectomy is?",opts:["Acute pain related to postoperative wound","Deficient knowledge about care and disease","Impaired nutrition less than body requirements","Risk for infection related to surgical incision"],a:3,t:"GI Surgery"},{q:"The T-tube in the common bile duct after choledochostomy is to?",opts:["Allow bile to drain until sufficient healing occurs","Permit drainage of excess fluid from the surgical site","Provide a means of evaluating patency of bile duct","Reduce inflammation in the duodenum"],a:0,t:"GI Surgery"},{q:"Complications of varicose veins include all the following EXCEPT?",opts:["Chronic venous insufficiency","Formation of leg ulcers","Rupture of distended aneurysm","Thrombophlebitis"],a:2,t:"Vascular"},{q:"Which intervention causes lysis of the clot formed within a vein or artery?",opts:["Adjuvant","Anticoagulation","Sclerotherapy","Thrombolytic"],a:3,t:"Vascular"},{q:"A patient convalescing from abdominal surgery develops thrombophlebitis. Which sign indicates this?",opts:["Intermittent claudication","Localised warmth and tenderness of the leg","Pitting oedema of the lower extremities","Severe pain on extension of the extremities"],a:1,t:"Vascular"},{q:"The sequential order in the development of pyothorax is: Exudate formation, Fibrinopurulent formation, Organisation formation. Which is correct?",opts:["I II III","I III II","III II I","II III I"],a:0,t:"Respiratory"},{q:"The impedance to smooth flow of blood from the right ventricle to the pulmonary trunk could be due to stenosis of?",opts:["Aortic valve","Mitral valve","Pulmonic valve","Tricuspid valve"],a:2,t:"Cardiac"},{q:"During inhalation in ventricular interdependence in constrictive pericarditis the negative thoracic pressure causes?",opts:["Left atrial bulging","Left ventricular bulging","Right atrial bulging","Right ventricular bulging"],a:3,t:"Cardiac"},{q:"Patients with cardiothoracic problems are placed in which position post-operatively after recovery from anaesthesia?",opts:["High Fowler's","Lithotomy","Sim's lateral","Trendelenburg"],a:0,t:"Cardiac"},{q:"A priority nursing diagnosis for a patient after cardiac surgery is?",opts:["Alteration in fluid volume and electrolytes related to decreased blood volume","Alteration in renal perfusion related to decreased cardiac output","Decreased cardiac output related to blood loss","Pain related to operative trauma"],a:2,t:"Cardiac"},{q:"Which measure will increase the chance of venous return?",opts:["Aiding venous return through wearing stockings","Operating with heels slightly elevated","Preoperative administration of estrogen","Taking pressure off the calves"],a:0,t:"Vascular"},{q:"Deficiency of alpha-1-antitrypsin is associated with which pulmonary condition?",opts:["Emphysema","Pulmonary embolism","Secondary pneumothorax","Tension pneumothorax"],a:0,t:"Respiratory"},{q:"The most identified feature of a patient with emphysema is?",opts:["Barrel chest","Bloody sputum","Copious sputum","Tenacious sputum"],a:0,t:"Respiratory"},{q:"Routine milking and stripping of chest tubes is no longer recommended for all reasons EXCEPT?",opts:["Can cause damage to pleural tissue","Dangerously increases intrapleural pressure","Decreases fluid and blood drained from pleural cavity","Newer tubes are coated with nonthrombogenic material"],a:3,t:"Respiratory"},{q:"When a thrombus develops in veins due to stasis or hypercoagulability but without inflammation the process is?",opts:["Deep vein thrombosis","Phlebothrombosis","Thrombophlebitis","Venous thrombosis"],a:1,t:"Vascular"},{q:"In constrictive pericarditis inflammation is characterized by all the following EXCEPT?",opts:["Contracture","Kussmaul's sign","Scarring","Thickening"],a:1,t:"Cardiac"},{q:"Positive Pratt's sign in DVT is best explained as?",opts:["Calf pain associated with dorsiflexion of the leg","Calf pain associated with walking","Pain that occurs with squeezing the calf","Pain with abduction of the limb"],a:2,t:"Vascular"},{q:"If a victim of spinal cord injury exhibited signs of respiratory arrest you might suspect damage to which region?",opts:["Cervical","Lumbar","Sacral","Thoracic"],a:0,t:"Neurological"},{q:"The region in the brain stem responsible for maintaining consciousness and awakening from sleep is the?",opts:["Limbic system","Pyramids","Reticular activating system","Thalamus"],a:2,t:"Neurological"},{q:"The initial cause of hypovolemia during the emergent phase of burn injury is?",opts:["Decreased vascular oncotic pressure","Fluid loss from denuded skin surfaces","Increased capillary permeability","Loss of sodium to the interstitium"],a:2,t:"Burns"},{q:"Which special sense has little effect in activating the reticular activating system during arousal from sleep?",opts:["Auditory impulses","Olfactory impulses","Touch pressure impulses","Visual impulse"],a:1,t:"Neurological"},{q:"Phantom pain is due to?",opts:["Hypochondria","Generation of nerve impulses in severed neurons after amputation","Registering pain in some place rather than actual site of tissue damage","Eating foods that are too highly seasoned"],a:1,t:"Neurological"},{q:"The initial intervention in emergency management of a burn of any type is to?",opts:["Assess for other associated injuries","Establish an IV line with a large-gauge needle","Establish and maintain airway","Remove the patient from the burn source and stop the burning process"],a:3,t:"Burns"},{q:"The nurse positions the patient with ear face and neck burns?",opts:["On the side","Prone","With extra padding around the head","Without pillows"],a:3,t:"Burns"},{q:"A patient admitted with possible cervical spinal cord injury - the nurse places highest priority on?",opts:["Assessing the patient for head and other injuries","Assessing the patient's motor and sensory function","Maintaining patent airway","Maintaining immobilization of the cervical spine"],a:3,t:"Neurological"},{q:"A patient with a spinal cord lesion at C8 has headache and feels flushed and warm. The first nursing action is to?",opts:["Assess the patient for a distended bladder or rectum","Check the patient's temperature","Elevate the head of the patient's bed","Take the patient's blood pressure"],a:0,t:"Neurological"},{q:"Following a T2 spinal cord injury the patient develops paralytic ileus. The nurse anticipates the patient will need?",opts:["IV fluids","Nasogastric suctioning","Total parenteral nutrition","Tube feeding"],a:1,t:"Neurological"},{q:"Urinary function during the acute phase of spinal cord injury is maintained with?",opts:["An indwelling catheter","Insertion of a suprapubic catheter","Intermittent catheterization","Use of incontinent pads"],a:0,t:"Neurological"},{q:"A patient with fractured femur develops malunion. The nurse recognises that?",opts:["Fracture heals in an unsatisfactory position","Fracture healing progresses more slowly than expected","Fracture fails to heal despite treatment","Loss of bone substance occurs due to immobilization"],a:0,t:"Orthopaedic"},{q:"Aqueous humour drains from the anterior chamber into the?",opts:["Canal of Schlemm","Ciliary processes","Lacrimal duct","Vitreous body"],a:0,t:"Ophthalmology"},{q:"Intraocular pressure is primarily due to the?",opts:["Aqueous humor","Iris","Lens","Vitreous body"],a:0,t:"Ophthalmology"},{q:"Constriction of the pupils is brought about by contraction of the?",opts:["Ciliary muscle","Circular muscle of the iris","Cornea","Extrinsic muscles of the eye"],a:1,t:"Ophthalmology"},{q:"A patient does not open eyes to any stimulus has no verbal response and flexes arm to pain. The Glasgow Coma Scale score is?",opts:["6","8","9","11"],a:0,t:"Neurological"},{q:"A patient had a craniotomy with anterior fossae incision. The nurse positions the patient?",opts:["Flat with head slightly hyperextended","On either side with head elevated 30 degrees","On the unoperative side","With head of bed elevated 15 degrees"],a:1,t:"Neurological"},{q:"Emergency management of a possible fracture before splinting should include?",opts:["Application of ice to the site","Elevation of the arm","Neurovascular checks below the site of injury","Notification of the surgeon"],a:2,t:"Orthopaedic"},{q:"When assessing traction of a patient with fracture femur a correction should be made if?",opts:["The patient exercises the unaffected limb","The patient is lying flat in the center of the bed","The ropes are in the center of the bed","The weights are touching the floor"],a:3,t:"Orthopaedic"},{q:"A patient with complete spinal cord transection at C7 - during the acute period the nurse expects?",opts:["Flaccid tetraplegia with loss of pressure sensation","Paraplegia with flaccid paralysis","Tetraplegia with total sensory loss","Total hemiplegia with sensory and motor loss"],a:0,t:"Neurological"},{q:"An initial incomplete spinal cord injury often results in complete cord damage because of?",opts:["Continued trauma from damaged stabilizing ligaments","Oedematous compression of cord above level of injury","Infarction and necrosis caused by edema hemorrhage and metabolites","Mechanical transection by sharp vertebral bone fragments"],a:2,t:"Neurological"},{q:"After thyroidectomy for Risk for Ineffective Breathing Pattern the nurse includes which intervention?",opts:["Encourage deep breathing and vigorous coughing","Maintain supine position","Maintain a pressure dressing on operative site","Monitor neck circumference every 4 hours"],a:3,t:"Endocrine"},{q:"A patient with Grave's disease is monitored for thyrotoxic crisis. Which signs alert the nurse?",opts:["Agitation and bradycardia","Fever and tachycardia","Pallor and tachycardia","Restlessness and bradycardia"],a:1,t:"Endocrine"},{q:"A patient has weight loss and tachycardia from endocrine disorder. Which gland is most likely responsible?",opts:["Adrenal cortex","Parathyroid","Pituitary","Thyroid"],a:3,t:"Endocrine"},{q:"After thyroidectomy the patient develops hoarseness and weak voice. The most appropriate nursing action is?",opts:["Administer calcium gluconate","Check for signs of bleeding","Notify physician immediately","Reassure patient that this is usually a temporary condition"],a:3,t:"Endocrine"},{q:"A nurse develops a plan for a patient with hyperthyroidism and includes which intervention?",opts:["Provide a high fibre diet","Provide a restful environment","Provide extra blankets","Provide small meals"],a:1,t:"Endocrine"},{q:"During the emergent phase of full-thickness burn over the lower half of the body the nurse expects?",opts:["Fever","Intense thirst","Severe pain","Unconsciousness"],a:1,t:"Burns"},{q:"A patient has 20% TBSA deep partial-thickness burn to right anterior chest and entire right arm. The nurse must assess for?",opts:["Formation of eschar","Presence of pain","Presence of pulses in the arms","Swelling of the arm"],a:2,t:"Burns"},{q:"Nasotracheal or endotracheal intubation is indicated in burn patients who have?",opts:["Electrical burns causing cardiac arrhythmias","Respiratory distress from inelastic eschar around the chest","Symptoms of hypoxia from carbon monoxide poisoning","Thermal burn injuries to face neck or airway"],a:3,t:"Burns"},{q:"The nurse suspects sepsis in a burn patient based on changes in?",opts:["Burn wound appearance","Gastrointestinal function","Urinary output","Vital signs"],a:0,t:"Burns"},{q:"A patient with spinal cord injury has poor cough with diaphragmatic breathing. The nurse?",opts:["Assesses lung sounds and respiratory parameters every 1-2 hours","Explains that mechanical ventilation will be necessary","Places the patient prone to promote drainage","Uses tracheal suctioning to remove secretions"],a:0,t:"Neurological"},{q:"Autonomic dysreflexia may be avoided by?",opts:["Careful attention to urinary output","Frequent ambulation","Keeping the room warm","Using an elastic corset to raise blood pressure"],a:0,t:"Neurological"},{q:"Which of the following does NOT result in increased ICP in patients with brain tumours?",opts:["Haemorrhage","Obstruction of CSF","Pituitary dysfunction","Vasogenic edema"],a:2,t:"Neurological"},{q:"After subtotal thyroidectomy the priority nursing diagnosis in the immediate postoperative period is?",opts:["Decreased cardiac output related to hemorrhage","Deficient fluid volume related to T3 and T4 deficits","Impaired urinary elimination related to hypercalcemia","Risk for infection related to high glucose levels"],a:0,t:"Endocrine"},{q:"For a postoperative patient following thyroidectomy with Ineffective Breathing Pattern the nurse suggests?",opts:["Encourage deep breathing exercise","Maintain supine position","Maintain pressure dressing on operative side","Monitor neck circumference every 4 hours"],a:0,t:"Endocrine"},{q:"Following thyroidectomy a sign most likely indicating hypocalcaemia is?",opts:["Bradycardia","Flaccid paralysis","Negative Chvostek's sign","Tingling around the mouth"],a:3,t:"Endocrine"},{q:"A patient after thyroidectomy is concerned about voice hoarseness. The nurse most appropriately tells the patient?",opts:["It indicates nerve damage","It is normal during this time and will subside","It is permanent","It will worsen before subsiding which may take 6 months"],a:1,t:"Endocrine"},{q:"A patient is monitored for thyrotoxic crisis. Which signs alert the nurse?",opts:["Agitation and bradycardia","Fever and tachycardia","Low-grade fever and tachycardia","Restlessness and bradycardia"],a:1,t:"Endocrine"},{q:"A patient has 2nd and 3rd degree burns on anterior lower leg and anterior thorax. Using rule of nines the extent is?",opts:["31.5%","36%","42%","45%"],a:1,t:"Burns"},{q:"A patient with a major burn is admitted. Which medication route will be prescribed for analgesics?",opts:["Intramuscular","Intravenous","Oral","Subcutaneous"],a:1,t:"Burns"},{q:"A patient with smoke inhalation injury is brought to emergency. The initial nursing action is to prepare to receive?",opts:["Endotracheal intubation and 100% oxygen via ventilator","100% humidified oxygen by face mask","Oxygen through nasal cannula","Pain medication"],a:1,t:"Burns"},{q:"The therapeutic outcome of an escharotomy for circumferential arm burn is?",opts:["Brisk bleeding from the site","Decrease oedema formation","Formation of granulation tissue","Return of distal pulses"],a:3,t:"Burns"},{q:"A nurse cares for a patient with circumferential burns on both legs. Which leg position is most appropriate?",opts:["Elevation above the level of the heart","Elevation of the knee cap on the bed","Flat without elevation","In a dependent position"],a:0,t:"Burns"},{q:"A nurse cares for a burn patient in protective isolation. Which is NOT a component of protective isolation?",opts:["Strict hand washing","Using sterile sheets and linen","Wearing gloves and gown only when caring for patient","Wearing protective mask cap shoe covers gloves scrub clothes and plastic apron"],a:2,t:"Burns"},{q:"The early sign of compartment syndrome of cast on the arm is?",opts:["Cold bluish colored fingers","Numbness and tingling in the fingers","Pain that increases when the arm is dependent","Pain relieved only by narcotic analgesic"],a:1,t:"Orthopaedic"},{q:"A patient had above-knee amputation 2 days ago. The elastic compression bandage has fallen off. The nurse immediately?",opts:["Applies a sterile dressing and elevates it on pillow","Applies ice to the site","Calls the physician","Rewraps the stump with an elastic compression bandage"],a:3,t:"Orthopaedic"},{q:"A patient with multiple fractures develops dyspnoea tachycardia and mental confusion suggesting fat embolism. Initial action?",opts:["Place the patient in Fowler's position","Place the patient in supine position","Perform neurological assessment","Reassess vital signs"],a:0,t:"Orthopaedic"},{q:"The nurse assesses a casted extremity for infection. Which sign is indicative of infection?",opts:["Coolness and pallor of the extremity","Diminished distal pulse","Dependent edema","Presence of a hot spot on the cast"],a:3,t:"Orthopaedic"},{q:"A patient complains of pain underneath a cast over a bony prominence. The nurse interprets this patient may need?",opts:["A window cut in the cast","Extra padding over this area","The cast bivalved","The cast replaced with an air splint"],a:0,t:"Orthopaedic"},{q:"After enucleation the nurse notes bright red drainage on the dressing. The most appropriate action is?",opts:["Continue to monitor vital signs","Document the finding","Mark drainage on dressing and monitor for increase in bleeding","Report the findings"],a:3,t:"Ophthalmology"},{q:"A patient in emergency department has a hyphema after hitting the steering wheel. The nurse prepares to position the patient?",opts:["Flat on bed rest","In lateral position on the affected side","In lateral position on the unaffected side","On bed rest in semi-Fowler's position"],a:3,t:"Ophthalmology"},{q:"When developing a teaching plan for a patient with glaucoma the nurse includes?",opts:["Avoid reading newspaper and watching TV","Decrease fluid intake to control intraocular pressure","Decrease the amount of salt in the diet","Eye medications will need to be administered for the rest of your life"],a:3,t:"Ophthalmology"},{q:"A patient had craniotomy with supratentorial incision. The nurse places the patient in which position?",opts:["Head of bed flat head and neck midline","Head of bed flat head turned to nonoperative side","Head of bed elevated 30-45 degrees head and neck midline","Head of bed elevated 30-45 degrees head turned to operative side"],a:2,t:"Neurological"},{q:"Preoperative instructions for the patient scheduled for subtotal thyroidectomy includes teaching the patient?",opts:["How to support the head with the hands when moving","That tingling around lips or fingers after surgery is expected and temporary","That coughing should be avoided to prevent pressure on incision","That head and neck will need to remain immobile until incision heals"],a:0,t:"Endocrine"},{q:"An appropriate nursing diagnosis for a patient with manifestations of hyperthyroidism is?",opts:["Exhaustion and dyspnea","Exophthalmos","Hair loss and vertigo","Weight loss and hunger"],a:3,t:"Endocrine"},{q:"A nurse assesses absent bowel sounds and abdominal distention 12 hours post burn. The nurse prepares to?",opts:["Administer histamine-2 blocking agent","Administer nutritional supplements through feeding tube","Insert a nasogastric tube for decompression","Withhold all oral intake except water"],a:2,t:"Burns"},{q:"When a patient is admitted following a head injury the nurse's FIRST priority is?",opts:["Establishing IV access with large-bore catheter","Determine presence of increased ICP","Maintaining cervical spine precautions","Monitoring for changes in neurological status"],a:2,t:"Neurological"},{q:"An appropriate nursing intervention for Altered Cerebral Tissue Perfusion related to cerebral edema is?",opts:["Avoiding positioning the patient with neck and hip flexion","Clustering nursing activities to provide uninterrupted rest","Maintaining hyperventilation to PaCO2 of 15-20 mmHg","Routine suctioning to prevent accumulation of respiratory secretions"],a:0,t:"Neurological"},{q:"When assessing body functions of a patient with increased intracranial pressure the nurse should initially assess?",opts:["Circulatory and respiratory status","Corneal reflex testing","Extremity strength testing","Pupillary reaction to light"],a:0,t:"Neurological"},{q:"Preoperative instructions appropriate for all patients includes?",opts:["Descriptions of the planned surgical procedure","Physical procedures required before surgery","Techniques of deep breathing and coughing","Withholding of all oral fluids or food after midnight"],a:2,t:"Perioperative"},{q:"Extrinsic factors for causing cancer can be all of the following EXCEPT?",opts:["Chemical","Emotional","Physical","Viral agents"],a:1,t:"Oncology"},{q:"During postoperative care nursing assessment of dressing includes noting?",opts:["Amount color odor consistency of drainage on dressing","How much adhesive is in place upon admission","The reaction of the patient when dressing is assessed","The size of the drain"],a:0,t:"Perioperative"},{q:"Which of the following is NOT a contributing factor for diverticular diseases?",opts:["Obesity","Increased intracolonic pressure","Decreased intracolonic pressure","Lack of dietary fibre"],a:2,t:"GI Surgery"},{q:"Acute abdomen is?",opts:["Intestinal obstruction","Generalized abdominal pain","Localized abdominal pain","All of the above"],a:3,t:"GI Surgery"},{q:"The cause of intestinal obstruction can be?",opts:["Mechanical","Congenital","Acquired","All of the above"],a:3,t:"GI Surgery"},{q:"A patient with intestinal obstruction being suctioned will be exposed to danger of excessive loss of?",opts:["Energy carbohydrates","Protein enzymes","Vitamins and minerals","Water and electrolytes"],a:3,t:"GI Surgery"},{q:"A patient complains of severe wound pain 2 days after surgery. The nurse should first?",opts:["Administer prescribed PRN analgesic","Check wound for bleeding","Find out when the last analgesic was given","Take the patient's vital signs"],a:3,t:"Perioperative"},{q:"Antibiotic therapy is given to patients with tetanus to?",opts:["Augment the immune system","Neutralize the toxins that have formed","Potentiate the effect of antitoxins","Reduce the clostridia in the blood"],a:3,t:"Pharmacology"},{q:"An effective first aid treatment for acidic burns on the skin is to flush with water and apply a solution of sodium?",opts:["Bicarbonate","Chloride","Hydroxide","Sulphate"],a:0,t:"Burns"},{q:"The principle to follow when changing a surgical dressing is to?",opts:["Confine the microorganisms to the wound","Keep the sterile field free from microorganisms","Reduce the number of opportunistic microorganisms to a minimum","Protect yourself from microorganisms in the wound"],a:1,t:"Perioperative"},{q:"For an unconscious patient the nurse should?",opts:["Check temperature orally","Elevate the foot of bed","Open the airway using the jaw thrust method","Turn patient head to one side"],a:3,t:"Neurological"},{q:"Concussion may occur as a result of?",opts:["A blow to the head","Brain tumour","Fracture of skull","Spinal injury"],a:0,t:"Neurological"},{q:"Patient with spinal cord injury should be encouraged to drink copiously primarily to prevent?",opts:["Fluid and electrolytes imbalance","Constipation","Dehydration","Urinary tract infection"],a:3,t:"Neurological"},{q:"When a gallstone lodges in the cystic duct the colour of the patient's stool would be?",opts:["Black","Brown","Clay colored","Greenish"],a:2,t:"GI Surgery"},{q:"The predominant symptom of ulcerative colitis is?",opts:["Constipation","Passage of bloody stools","Passage of stools containing pus","Passage of mucous stools"],a:1,t:"GI Surgery"},{q:"Signs indicating dehydration: cracked lips, cold and clammy skin, decreased urinary output, thirsty. Which is correct?",opts:["I II and III","I II and IV","II III and IV","I II III and IV"],a:3,t:"Fluid Balance"},{q:"Which diet would be appropriate for a client with ulcerative colitis?",opts:["High fibre low protein","High carbohydrate low sodium","Low protein high calorie","Low residue high protein"],a:3,t:"GI Surgery"},{q:"A priority nursing diagnosis for a client with prostate cancer is?",opts:["Anxiety related to inability to void","High risk for infection related to bacterial invasion","Knowledge deficit related to postoperative management","Pain related to surgical incision and bladder spasms"],a:3,t:"Oncology"},{q:"A compound fracture is one in which?",opts:["One side of the bone is broken and other side bent","The bone has splintered into several fragments","The fractured bone has been compressed by another bone","There is a break in the skin and underlying soft tissue"],a:3,t:"Orthopaedic"},{q:"Intramedullary nailing is used in the treatment of?",opts:["Fracture of the neck of femur","Fracture of the shaft of femur","Slipped epiphysis of the femur","Fracture of tibia and fibula"],a:1,t:"Orthopaedic"},{q:"Which of the following will cause loss of sodium in the blood?",opts:["Diarrhea","Excessive use of diuretics","Gastric suction","Vomiting"],a:1,t:"Fluid Balance"},{q:"First aid for epistaxis includes all of the following EXCEPT?",opts:["Apply cold compress to bridge of nose","Ask client to breathe through the mouth","Grip the tip of nose between thumb and forefinger","Let client sit up and gently throw head backward"],a:3,t:"ENT"},{q:"When caring for a patient in pain which activity would NOT help reduce the pain?",opts:["Administering prescribed analgesics","Leaving the patient alone to relax","Teaching the patient about pain and its relief","Using guided imagery"],a:1,t:"Pain Management"},{q:"The main cause of pressure sore is?",opts:["Immobilization and lack of normal movement","Moisture due to wetting of bed sheet with urine","Poor nutrition of the patient","Pressure exerted on the skin and subcutaneous tissues"],a:3,t:"Basic Nursing"},{q:"When dressing an abdominal wound draining pus copiously which type of bandage would you use?",opts:["Many-tail","Roller","T-bandage","Triangular"],a:0,t:"Basic Nursing"}],DSSN112:[{q:"Which suggests a patient is experiencing auditory hallucinations?",opts:["Brushing skin continuously","Getting up suddenly and standing at attention","Talking to someone who is not present","Staring blankly"],a:2,t:"Mental Health"},{q:"The primary goal for community psychiatric nursing is to:",opts:["Help families cope","Prevent hospitalisation of mentally ill clients","Administer medications in the community","Rehabilitate discharged patients"],a:1,t:"Mental Health"},{q:"How do you feel today is an example of:",opts:["Closed-ended communication","Therapeutic open-ended communication","Redirecting technique","Confrontation"],a:1,t:"Mental Health"},{q:"A patient believes he is being followed by government agents. This is a:",opts:["Hallucination","Delusion of persecution","Illusion","Obsession"],a:1,t:"Mental Health"},{q:"The neurotransmitter MOST implicated in schizophrenia is:",opts:["Serotonin","Dopamine","GABA","Norepinephrine"],a:1,t:"Mental Health"},{q:"A patient on chlorpromazine develops shuffling gait mask-like face and pill-rolling tremor. This is:",opts:["Tardive dyskinesia","Extrapyramidal side effects pseudoparkinsonism","Neuroleptic malignant syndrome","Akathisia"],a:1,t:"Mental Health"},{q:"A therapeutic communication technique is:",opts:["Giving advice","Offering false reassurance","Active listening and reflecting","Changing the subject"],a:2,t:"Mental Health"},{q:"Side effects of chlorpromazine include:",opts:["Anorexia bradycardia and constipation","Fatigue drowsiness and dry mouth","Nausea vomiting and diarrhoea","Urinary retention dry mouth and hypotension"],a:3,t:"Mental Health"},{q:"Nursing monitoring for a patient on amitriptyline includes:",opts:["Hypotension and anticholinergic effects","Hypertension and tachycardia","Hypoglycaemia and tremors","Respiratory depression and euphoria"],a:0,t:"Mental Health"},{q:"A patient making repetitive hand-washing motions may indicate:",opts:["Phobia","Obsessive-compulsive behaviour","Mania","Psychosis"],a:1,t:"Mental Health"},{q:"A manic patient's PRIORITY nursing intervention is:",opts:["Encourage group activities","Ensure a safe calm low-stimulation environment","Administer antidepressants","Encourage expressing all feelings"],a:1,t:"Mental Health"},{q:"The aim of recreational therapy for psychiatric patients is to:",opts:["Help generate income","Assist in socialisation and communication skills","Enable the patient to believe they can do everything","Mobilise external support"],a:1,t:"Mental Health"},{q:"Immediate observation on psychiatric admission includes:",opts:["Psychological testing only","Motor behaviour general appearance and speech","Electroencephalogram","Urine toxicology only"],a:1,t:"Mental Health"},{q:"A client says I want to kill myself. The nurse's FIRST response is:",opts:["Don't say that things will get better","Are you thinking about ending your life Tell me more","I will call security immediately","Ignore and change the subject"],a:1,t:"Mental Health"},{q:"An open-ended question is:",opts:["Do you need anything from the doctor","How do you feel about your situation","Is your pain worse today","Did you sleep well"],a:1,t:"Mental Health"},{q:"When administering lithium carbonate the nurse must monitor:",opts:["Blood glucose","Serum lithium level and renal function","Liver enzymes","Full blood count weekly"],a:1,t:"Mental Health"},{q:"A patient with alcohol dependence admitted for detoxification - the nurse anticipates:",opts:["Hypotension and bradycardia","Withdrawal seizures and delirium tremens","Respiratory depression only","Severe hypothermia"],a:1,t:"Mental Health"},{q:"A positive symptom of schizophrenia is:",opts:["Flat affect","Anhedonia","Hallucinations and delusions","Social withdrawal"],a:2,t:"Mental Health"},{q:"In the orientation phase of the nurse-patient relationship the PRIORITY task is:",opts:["Terminating the relationship","Establishing trust and defining roles","Exploring the patient's past","Administering medications"],a:1,t:"Mental Health"},{q:"Huntington's chorea is BEST prevented by:",opts:["Broad-spectrum antibiotics","Genetic counselling","Hormone therapy","Radiotherapy"],a:1,t:"Mental Health"},{q:"Which level of prevention includes immunisation programmes?",opts:["Tertiary","Secondary","Primary","Primordial"],a:2,t:"Public Health"},{q:"Ghana's EPI protects children against how many diseases?",opts:["6","8","10","13"],a:2,t:"Public Health"},{q:"Screening to detect hypertension early is an example of:",opts:["Primary prevention","Secondary prevention","Tertiary prevention","Health promotion"],a:1,t:"Public Health"},{q:"A vector-borne disease common in Ghana is:",opts:["Tuberculosis","Malaria","Cholera","Typhoid fever"],a:1,t:"Public Health"},{q:"The major route of transmission of cholera is:",opts:["Airborne droplets","Contaminated food and water","Sexual contact","Direct skin contact"],a:1,t:"Public Health"},{q:"Herd immunity BEST describes:",opts:["Immunity through breastfeeding","Resistance of a group when sufficient proportion is immune","Immunity from previous infection only","Immunity given by vaccines to individuals only"],a:1,t:"Public Health"},{q:"The PRIMARY purpose of a community home visit is:",opts:["Administer physician-prescribed treatment","Assess the home environment and provide health education","Report the family's activities","Sell health products"],a:1,t:"Public Health"},{q:"The Alma Ata Declaration 1978 is associated with:",opts:["Hospital-based care","Primary health care as the cornerstone of health for all","Specialist nursing education","Tertiary prevention"],a:1,t:"Public Health"},{q:"Which disease is targeted for eradication in Ghana's immunisation programme?",opts:["Malaria","Poliomyelitis","Tuberculosis","Cholera"],a:1,t:"Public Health"},{q:"Epidemiology is BEST defined as:",opts:["The study of drugs","The study of distribution and determinants of disease in populations","The study of genes","The science of nursing interventions"],a:1,t:"Public Health"},{q:"A cluster of malaria cases in a village is referred to as:",opts:["Endemic","Epidemic","Pandemic","Sporadic"],a:1,t:"Public Health"},{q:"The MOST effective method of preventing infectious disease spread is:",opts:["Wearing face masks","Hand hygiene with soap and water or alcohol-based rub","Administering broad-spectrum antibiotics","Isolating all patients"],a:1,t:"Public Health"},{q:"A component of primary health care according to Alma Ata is:",opts:["Specialist surgical care","Safe water and basic sanitation","Hospital intensive care","Organ transplantation"],a:1,t:"Public Health"},{q:"Which vaccine requires a cold chain for storage?",opts:["Oral rehydration salts","Polio vaccine","Iron supplements","Vitamin A capsules"],a:1,t:"Public Health"},{q:"In TB contact tracing who is MOST important to trace?",opts:["All residents","Close contacts with prolonged exposure to the index case","Casual contacts in public spaces","Only family members"],a:1,t:"Public Health"},{q:"A leading cause of maternal mortality in Ghana is:",opts:["Malaria only","Haemorrhage sepsis and hypertensive disorders of pregnancy","Anaemia only","Diabetes in pregnancy"],a:1,t:"Public Health"},{q:"The DOTS strategy is used in managing:",opts:["HIV/AIDS","Tuberculosis","Malaria","Cholera"],a:1,t:"Public Health"},{q:"The MOST common indicator for measuring maternal health in a community is:",opts:["Infant mortality rate","Maternal mortality ratio","Under-5 mortality rate","Neonatal mortality rate"],a:1,t:"Public Health"},{q:"The correct home-made ORS recipe is:",opts:["1 litre water 6 teaspoons sugar 1 teaspoon salt","1 litre water 10 teaspoons sugar 3 teaspoons salt","500 mL water 3 teaspoons sugar 1 teaspoon salt","2 litres water 8 teaspoons sugar 2 teaspoons salt"],a:0,t:"Public Health"},{q:"Which is NOT a component of IMCI?",opts:["Assessment of feeding","Classification of illness","Surgical management","Counselling the caregiver"],a:2,t:"Public Health"},{q:"A variable the researcher manipulates is called a:",opts:["Dependent variable","Independent variable","Extraneous variable","Confounding variable"],a:1,t:"Research"},{q:"A research design using both quantitative and qualitative methods is:",opts:["Descriptive","Experimental","Mixed methods","Case study"],a:2,t:"Research"},{q:"The ethical principle of do no harm in research is:",opts:["Beneficence","Non-maleficence","Justice","Autonomy"],a:1,t:"Research"},{q:"A researcher follows a group from 2020-2026 to observe hypertension development. This is a:",opts:["Cross-sectional study","Retrospective cohort study","Prospective cohort study","Case-control study"],a:2,t:"Research"},{q:"Which sampling method gives every member an equal chance of selection?",opts:["Purposive","Convenience","Simple random","Snowball"],a:2,t:"Research"},{q:"The section reviewing what is already known about the topic is the:",opts:["Methodology","Literature review","Data analysis","Abstract"],a:1,t:"Research"},{q:"The Likert scale measures:",opts:["Physical height and weight","Attitudes perceptions and opinions","Bacterial colony counts","Physiological parameters"],a:1,t:"Research"},{q:"The measure of central tendency MOST affected by extreme values is:",opts:["Mode","Median","Mean","Range"],a:2,t:"Research"},{q:"Informed consent in research means the participant has:",opts:["Been told the study is compulsory","Voluntarily agreed after being fully informed without coercion","Signed any form given to them","Completed the research themselves"],a:1,t:"Research"},{q:"A pilot study is BEST described as:",opts:["The main full-scale study","A small-scale preliminary study to test feasibility","A review of past research","A qualitative interview study only"],a:1,t:"Research"},{q:"In research validity refers to:",opts:["Consistency of a measuring tool","The degree to which a tool measures what it is intended to measure","Size of the research sample","Statistical analysis method"],a:1,t:"Research"},{q:"A qualitative data collection method is:",opts:["Structured questionnaire with numerical scales","In-depth interviews and focus groups","Randomised controlled trial","Laboratory blood tests"],a:1,t:"Research"},{q:"The section describing how a study was conducted is the:",opts:["Literature review","Discussion","Methodology","Introduction"],a:2,t:"Research"},{q:"Plagiarism is BEST prevented by:",opts:["Citing all sources properly","Writing quickly without reading previous work","Copying tables without acknowledgement","Using only unpublished sources"],a:0,t:"Research"},{q:"The p-value in statistics determines:",opts:["Sample size adequacy","Whether results are statistically significant","The qualitative theme of the study","Reliability of the instrument"],a:1,t:"Research"},{q:"The HIGHEST level of evidence in evidence-based practice is:",opts:["Expert opinion","Case reports","Systematic reviews and meta-analyses","Single randomised controlled trials"],a:2,t:"Research"},{q:"Ensuring all participants remain anonymous addresses:",opts:["Justice","Confidentiality and privacy","Beneficence","Non-maleficence"],a:1,t:"Research"},{q:"An experimental research design requires:",opts:["No control group","Random assignment of participants to groups","Observational data only","No hypothesis"],a:1,t:"Research"},{q:"The BEST source of evidence for nursing practice guidelines is:",opts:["Newspaper articles","Peer-reviewed nursing journals","Social media posts","Patients opinions alone"],a:1,t:"Research"},{q:"A nurse investigating increasing ward infections is an example of:",opts:["Quantitative research","Clinical audit and quality improvement research","Systematic review","Theoretical framework development"],a:1,t:"Research"}],DSGN116:[{q:"A primigravida at 38 weeks has severe headache blurred vision and BP 160/110. The nurse suspects:",opts:["Gestational diabetes","Pre-eclampsia or eclampsia","Normal late pregnancy","Placenta praevia"],a:1,t:"Obstetric"},{q:"The FIRST stage of labour ends when:",opts:["The presenting part is visible","The placenta is delivered","The cervix is fully dilated 10 cm","Active contractions begin"],a:2,t:"Obstetric"},{q:"FHR drops to 90 bpm during contractions. The PRIORITY nursing action is:",opts:["Document and monitor","Turn the client to her left lateral position","Prepare for caesarean section","Increase IV fluids"],a:1,t:"Obstetric"},{q:"A sign of placental separation after delivery is:",opts:["Increased FHR","Lengthening of the cord and gush of blood","Return of regular contractions","Rise in maternal BP"],a:1,t:"Obstetric"},{q:"In the second stage of labour FHR should be assessed every:",opts:["30 minutes","15 minutes","5 minutes","Continuously only"],a:2,t:"Obstetric"},{q:"The MOST common cause of primary postpartum haemorrhage is:",opts:["Retained placenta","Uterine atony","Genital tract lacerations","Blood coagulation disorders"],a:1,t:"Obstetric"},{q:"A Rh-negative mother delivers a Rh-positive baby. The nurse anticipates:",opts:["Anti-D immunoglobulin within 72 hours","Rh-positive blood transfusion","Folic acid supplements","Vitamin K injection"],a:0,t:"Obstetric"},{q:"Which position is CONTRAINDICATED for cord prolapse?",opts:["Left lateral","Knee-chest","Trendelenburg","Lithotomy"],a:3,t:"Obstetric"},{q:"Lochia rubra is expected for:",opts:["The first 1-3 days","Days 4-9","Days 10-14","Beyond 2 weeks"],a:0,t:"Obstetric"},{q:"LAM is effective ONLY when:",opts:["Fully breastfed no menses baby under 6 months","Mother uses formula supplementation","Baby is over 12 months","Mother breastfeeds once daily"],a:0,t:"Obstetric"},{q:"The Bishop score assesses:",opts:["Fetal wellbeing in utero","Cervical ripeness and readiness for induction","Gestational age","Placental function"],a:1,t:"Obstetric"},{q:"A pregnant woman at 28 weeks has Hb of 8.5 g/dL. This is classified as:",opts:["Normal for pregnancy","Mild anaemia","Moderate anaemia","Severe anaemia"],a:2,t:"Obstetric"},{q:"When administering oxytocin during labour the nurse monitors for:",opts:["Fetal tachycardia only","Uterine hyperstimulation and fetal distress","Maternal bradycardia","Placental abruption"],a:1,t:"Obstetric"},{q:"An early sign of puerperal sepsis is:",opts:["Lochia rubra on day 1","Temperature above 38 degrees on 2 or more days after day 1","Mild breast engorgement","Uterine involution"],a:1,t:"Obstetric"},{q:"On day 1 post-delivery the fundus should be located:",opts:["At the level of the umbilicus","One finger breadth above the umbilicus","Two finger breadths below the umbilicus","At the symphysis pubis"],a:1,t:"Obstetric"},{q:"Painless bright red vaginal bleeding at 32 weeks - the nurse FIRST suspects:",opts:["Placenta praevia","Abruptio placentae","Cervical incompetence","Bloody show"],a:0,t:"Obstetric"},{q:"Eclampsia is correctly defined as:",opts:["Hypertension after 20 weeks","Pre-eclampsia complicated by generalised seizures","Chronic hypertension with proteinuria","Normal hypertension in pregnancy"],a:1,t:"Obstetric"},{q:"Apgar score is assessed at:",opts:["Birth only","1 minute and 5 minutes after birth","5 minutes and 10 minutes","Immediately and at 30 minutes"],a:1,t:"Obstetric"},{q:"A neonate's Apgar score is 4 at 1 minute. The PRIORITY action is:",opts:["Continue routine care","Initiate gentle stimulation and oxygen support","Prepare for intubation immediately","Document and await re-assessment at 5 minutes only"],a:1,t:"Obstetric"},{q:"A reliable method for estimating gestational age at birth is:",opts:["Birth weight alone","New Ballard Score","Head circumference only","Length of the baby"],a:1,t:"Obstetric"},{q:"A child with suspected meningitis - which symptom is MOST likely?",opts:["Bradycardia and hypertension","Nuchal rigidity and high-pitched cry","Hypothermia and bradypnoea","Generalised oedema"],a:1,t:"Paediatric"},{q:"Which vaccine is given at birth in Ghana's EPI?",opts:["DPT","OPV 0 and BCG","Measles vaccine","Hepatitis B only"],a:1,t:"Paediatric"},{q:"Expected developmental milestone for a 6-month-old:",opts:["Walking independently","Sitting with support and transferring objects","Speaking 2-3 words","Pincer grasp"],a:1,t:"Paediatric"},{q:"A 2-year-old with severe dehydration from diarrhoea - the nurse's PRIORITY is:",opts:["Oral rehydration only","Establish IV access and administer IV fluids as prescribed","Administer antidiarrhoeal drugs","Advise caregiver on diet"],a:1,t:"Paediatric"},{q:"The expected weight of a 9-month-old is approximately:",opts:["Birth weight","Double the birth weight","Triple the birth weight","4 times birth weight"],a:1,t:"Paediatric"},{q:"The MOST appropriate feeding for a 3-month-old is:",opts:["Weaning foods and formula","Exclusive breastfeeding","Cow's milk","Porridge and breastmilk"],a:1,t:"Paediatric"},{q:"A 4-year-old with oedema moon face and wasting has:",opts:["Marasmus","Kwashiorkor","Rickets","Vitamin A deficiency"],a:1,t:"Paediatric"},{q:"Clinical signs of respiratory distress in a child include:",opts:["RR 30 per min in a 5-year-old","Nasal flaring intercostal retractions and grunting","Mild cough and runny nose","Regular breathing with no effort"],a:1,t:"Paediatric"},{q:"The correct paediatric drug dose formula is:",opts:["Adult dose multiplied by age divided by 150","Weight in kg multiplied by recommended dose per kg","Adult dose divided by 2","Fixed dose for all under 12"],a:1,t:"Paediatric"},{q:"A child with sickle cell disease in pain crisis - PRIORITY intervention is:",opts:["Restrict fluids","Administer analgesics and IV fluids as prescribed","Apply ice packs","Encourage ambulation"],a:1,t:"Paediatric"},{q:"Which sign indicates SEVERE dehydration in an infant?",opts:["Slightly dry lips","Sunken fontanelle and skin tent persisting over 2 seconds","Reduced urine once","Mild irritability"],a:1,t:"Paediatric"},{q:"The classic triad of congenital hypothyroidism includes:",opts:["Fever jaundice and rash","Mental retardation growth failure and coarse features","Seizures cyanosis and feeding difficulty","Hyperactivity poor sleep and weight gain"],a:1,t:"Paediatric"},{q:"A child on gentamicin should be monitored for:",opts:["Hepatotoxicity","Nephrotoxicity and ototoxicity","Hypoglycaemia","Peripheral neuropathy"],a:1,t:"Paediatric"},{q:"The MOST common cause of death in under-5 children in Ghana is:",opts:["Malnutrition alone","Malaria pneumonia and diarrhoea","Road traffic accidents","Congenital abnormalities"],a:1,t:"Paediatric"},{q:"A child with febrile convulsion arrives at emergency. The nurse's FIRST action is:",opts:["Insert an IV line","Ensure a patent airway and protect from injury","Administer phenobarbitone","Perform a lumbar puncture"],a:1,t:"Paediatric"},{q:"Erikson's stage for a 3-year-old is:",opts:["Trust vs Mistrust","Autonomy vs Shame and Doubt","Initiative vs Guilt","Industry vs Inferiority"],a:2,t:"Paediatric"},{q:"The primary complication to anticipate in a child with acute rheumatic fever is:",opts:["Renal failure","Cardiac valvular disease","Cerebral oedema","Liver cirrhosis"],a:1,t:"Paediatric"},{q:"Increased intracranial pressure in an infant is indicated by:",opts:["Sunken fontanelle","Bulging anterior fontanelle","Absence of Moro reflex","Bilateral equal pupils"],a:1,t:"Paediatric"},{q:"When a 10-year-old is prescribed amoxicillin TDS the caregiver should be told to:",opts:["Give for 3 days only","Complete the full course even if the child feels better","Give a double dose if one is missed","Administer only when the child has fever"],a:1,t:"Paediatric"},{q:"A sign of vitamin A deficiency in a child is:",opts:["Scurvy and bleeding gums","Night blindness and Bitot's spots","Bow legs and soft skull","Pellagra and dermatitis"],a:1,t:"Paediatric"},{q:"The MOST suggestive finding of physical abuse in a 5-year-old is:",opts:["A single bruise on the shin","Multiple bruises in various stages of healing in unusual locations","A healing wound on the knee","Single bruise from a fall"],a:1,t:"Child Protection"},{q:"The nurse's obligation when child abuse is suspected is:",opts:["Keep it confidential","Report the suspected abuse to the appropriate authority","Counsel the parents only","Wait for the child to disclose more"],a:1,t:"Child Protection"},{q:"Shaken baby syndrome is characterised by:",opts:["External head trauma","Subdural and retinal haemorrhage without external injury","Fractures of the long bones only","Bruising to the back and buttocks"],a:1,t:"Child Protection"},{q:"The MOST common form of child abuse globally is:",opts:["Physical abuse","Emotional abuse","Sexual abuse","Neglect"],a:3,t:"Child Protection"},{q:"A nurse disclosing a child's abuse to the family before reporting is:",opts:["Encouraged to maintain trust","A violation that could endanger the child and compromise the investigation","Acceptable if the family is cooperative","Mandatory before filing a report"],a:1,t:"Child Protection"},{q:"Sexual abuse in a child is defined as:",opts:["Physical punishment for misbehaviour","Any sexual activity between a child and an adult or older child","Neglect of emotional needs","Withholding food as punishment"],a:1,t:"Child Protection"},{q:"Documentation of suspected child abuse should be:",opts:["Subjective - the nurse's interpretation","Objective - exact observations and direct quotes from the child","Brief - date only","Withheld until confirmed"],a:1,t:"Child Protection"},{q:"In Ghana the primary law protecting children is:",opts:["The Nurses and Midwives Act","The Children's Act 1998 Act 560","The Mental Health Act","The Public Health Act"],a:1,t:"Child Protection"},{q:"An indicator of emotional abuse in a child is:",opts:["A single fracture from a fall","Consistent low self-esteem withdrawal and fear of parents","A healing bruise on the shin","Normal developmental milestones"],a:1,t:"Child Protection"},{q:"When a child discloses abuse to the nurse the nurse should:",opts:["Express shock and disbelief","Remain calm listen without judgement and reassure the child","Ask the child to repeat the story multiple times","Promise to keep it a secret"],a:1,t:"Child Protection"},{q:"The hormonal change triggering onset of labour is:",opts:["Decrease in progesterone and increase in oestrogen and oxytocin","Increase in progesterone and decrease in oestrogen","Decrease in oxytocin and prolactin","Increase in hCG"],a:0,t:"Obstetric"},{q:"Breast milk provides passive immunity through:",opts:["Immunoglobulin A","Immunoglobulin M","Immunoglobulin E","Immunoglobulin G only"],a:0,t:"Obstetric"},{q:"The BEST position during active labour to promote fetal descent is:",opts:["Supine","Upright or walking to use gravity","Left lateral only","Lithotomy"],a:1,t:"Obstetric"},{q:"Burns affecting the entire right arm of a child using Rule of Nines is approximately:",opts:["9%","4.5%","18%","36%"],a:0,t:"Paediatric"},{q:"A neonate born at 34 weeks is classified as:",opts:["Full-term","Post-term","Late pre-term","Early term"],a:2,t:"Paediatric"},{q:"A newborn assessment finding requiring IMMEDIATE attention is:",opts:["Heart rate 140 bpm","RR 45 breaths per min","Central cyanosis persisting after 5 minutes","Milia on the nose"],a:2,t:"Paediatric"},{q:"The PRIMARY purpose of antenatal care visits is:",opts:["Determine the sex of the baby","Detect complications early and promote health of mother and baby","Prescribe vitamins only","Prepare for caesarean section"],a:1,t:"Obstetric"},{q:"A child's weight below the 3rd percentile on the growth chart indicates:",opts:["Normal variation","Failure to thrive - requires further assessment","Overweight","Above expected weight for age"],a:1,t:"Paediatric"},{q:"The MOST common complication of gestational diabetes is:",opts:["Small for gestational age baby","Macrosomia and neonatal hypoglycaemia","Premature rupture of membranes","Placenta praevia"],a:1,t:"Obstetric"},{q:"A child with suspected intussusception. The nurse expects to find:",opts:["Gradual weight loss only","Sudden onset colicky abdominal pain vomiting and red currant jelly stools","Constipation for 2 weeks","Fever and rash only"],a:1,t:"Paediatric"}]};
+
+var TC={'Surgical Nursing':'#3b82f6','Medical Nursing':'#0ea5e9','Pharmacology':'#f97316','Nursing Process':'#84cc16','Basic Nursing':'#06b6d4','Advanced Nursing':'#8b5cf6','Professional':'#ec4899','Mental Health':'#a855f7','Public Health':'#10b981','Research':'#14b8a6','Obstetric':'#f43f5e','Paediatric':'#f59e0b','Child Protection':'#ef4444'};
+var CL={DSSN114:'DSSN 114 Med-Surg',DSSN112:'DSSN 112 PH & Mental Health',DSGN116:'DSGN 116 Obs & Paeds'};
+
+var currentRole='',studentName='',selectedCourse='';
+var questions=[],answers={},flagged={},currentQ=0;
+var timerInt=null,timeLeft=0,submitted=false;
+var allResults=[];
+
+function goto(id){
+  document.querySelectorAll('.screen').forEach(function(s){
+    s.classList.remove('active');
+    s.style.display='none';
+  });
+  var el=document.getElementById(id);
+  el.style.display='flex';
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function pickRole(r){
+  currentRole=r;
+  document.getElementById('rb_s').classList.toggle('picked',r==='student');
+  document.getElementById('rb_a').classList.toggle('picked',r==='admin');
+  document.getElementById('cont1').disabled=false;
+}
+
+function gotoLogin(){
+  if(!currentRole)return;
+  if(currentRole==='student'){
+    document.getElementById('fStudent').style.display='block';
+    document.getElementById('fAdmin').style.display='none';
+  }else{
+    document.getElementById('fStudent').style.display='none';
+    document.getElementById('fAdmin').style.display='block';
+  }
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('iName').value='';
+  document.getElementById('iPass').value='';
+  document.getElementById('iAdminPass').value='';
+  document.getElementById('iCourse').value='';
+  goto('s2');
+}
+
+function doLogin(){
+  var e=document.getElementById('loginErr');
+  e.style.display='none';
+  if(currentRole==='admin'){
+    var pw=document.getElementById('iAdminPass').value.trim();
+    if(pw!==PW.ADMIN){showErr('Incorrect admin password.');return;}
+    loadData();
+    buildAdmin('ALL');
+    goto('s5');
+  }else{
+    var name=document.getElementById('iName').value.trim();
+    var course=document.getElementById('iCourse').value;
+    var pw=document.getElementById('iPass').value.trim().replace(/\s/g,'').toUpperCase();
+    if(!name){showErr('Please enter your full name.');return;}
+    if(!course){showErr('Please select your course paper.');return;}
+    if(pw!==PW[course]){showErr('Incorrect password for this course.');return;}
+    studentName=name;selectedCourse=course;
+    launchExam();
+  }
+}
+
+function showErr(msg){
+  var e=document.getElementById('loginErr');
+  e.textContent='\u274c '+msg;
+  e.style.display='block';
+}
+
+function shuffle(a){
+  var arr=a.slice();
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;
+  }
+  return arr;
+}
+
+
+
+function toggleFlag(idx){
+  if(flagged[idx]) delete flagged[idx];
+  else flagged[idx] = true;
+  renderQ();
+  renderFlagBar();
+  renderNavGrid();
+}
+
+function removeFlagAndStay(idx){
+  delete flagged[idx];
+  renderFlagBar();
+  renderNavGrid();
+  renderQ();
+}
+
+function jumpTo(idx){
+  currentQ = idx;
+  renderQ();
+  renderNavGrid();
+  // Scroll exam body to top
+  var eb = document.getElementById('examBody');
+  if(eb) eb.scrollTop = 0;
+}
+
+function renderFlagBar(){
+  var bar   = document.getElementById('flagBar');
+  var empty = document.getElementById('flagEmpty');
+  var keys  = Object.keys(flagged).map(Number).sort(function(a,b){return a-b;});
+  if(keys.length === 0){
+    empty.style.display = 'inline';
+    // remove all chips
+    var chips = bar.querySelectorAll('.flag-chip');
+    chips.forEach(function(c){ c.remove(); });
+    return;
+  }
+  empty.style.display = 'none';
+  // Remove old chips
+  bar.querySelectorAll('.flag-chip').forEach(function(c){ c.remove(); });
+  keys.forEach(function(k){
+    var chip = document.createElement('div');
+    chip.className = 'flag-chip';
+    chip.innerHTML = '&#x1F6A9; Q' + (k+1) + ' <span class="fc-x" onclick="event.stopPropagation();removeFlagAndStay('+k+')">&#x2715;</span>';
+    chip.addEventListener('click', function(){ jumpTo(k); });
+    bar.appendChild(chip);
+  });
+}
+
+function renderNavGrid(){
+  var grid = document.getElementById('qNavGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  for(var i = 0; i < questions.length; i++){
+    var dot = document.createElement('div');
+    dot.className = 'q-nav-dot';
+    if(i === currentQ)       dot.classList.add('current');
+    if(answers[i] !== undefined) dot.classList.add('answered');
+    if(flagged[i])           dot.classList.add('flagged');
+    dot.textContent = i + 1;
+    (function(idx){ dot.addEventListener('click', function(){ jumpTo(idx); }); })(i);
+    grid.appendChild(dot);
+  }
+  // Scroll current dot into view
+  var currentDot = grid.children[currentQ];
+  if(currentDot) currentDot.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'});
+}
+
+function makeWatermark(name, elemId){
+  var el = document.getElementById(elemId);
+  if(!el) return;
+  el.innerHTML = '';
+  var text = name + ' \u2022 GREAT MINDS \u2022 ' + name + ' \u2022 GREAT MINDS \u2022 ';
+  for(var row = -2; row < 20; row++){
+    for(var col = -1; col < 6; col++){
+      var span = document.createElement('span');
+      span.className = 'watermark-text';
+      span.textContent = text;
+      span.style.top = (row * 120 + (col % 2 === 0 ? 0 : 60)) + 'px';
+      span.style.left = (col * 300 - 100) + 'px';
+      el.appendChild(span);
+    }
+  }
+}
+
+function shuffleOpts(question){
+  // Shuffle options but track correct answer
+  var indices = [0,1,2,3];
+  for(var i=indices.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=indices[i];indices[i]=indices[j];indices[j]=tmp;
+  }
+  var newOpts = indices.map(function(i){ return question.opts[i]; });
+  var newAns = indices.indexOf(question.a);
+  return {q:question.q, opts:newOpts, a:newAns, t:question.t};
+}
+
+function launchExam(){
+  questions=shuffle(QB[selectedCourse]).slice(0,60);
+  answers={};flagged={};currentQ=0;submitted=false;timeLeft=EXAM_SECS;
+  document.getElementById('topName').textContent=studentName;
+  goto('s3');
+  buildWatermark();
+  shuffledOpts={};
+  renderQ();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    timeLeft--;
+    tickTimer();
+    if(timeLeft<=0){clearInterval(timerInt);autoSubmit();}
+  },1000);
+}
+
+function tickTimer(){
+  var m=String(Math.floor(timeLeft/60)).padStart(2,'0');
+  var s=String(timeLeft%60).padStart(2,'0');
+  var el=document.getElementById('timerEl');
+  el.textContent=m+':'+s;
+  el.className='timer';
+  if(timeLeft<=300)el.classList.add('warn');
+  if(timeLeft<=60){el.classList.remove('warn');el.classList.add('danger');}
+}
+
+// Each question gets shuffled options per-student (seeded by name)
+var shuffledOpts = {}; // stores shuffled option order per question index
+
+function seededRand(seed, i) {
+  var x = Math.sin(seed + i) * 10000;
+  return x - Math.floor(x);
+}
+
+function getShuffledOpts(qIdx) {
+  if (shuffledOpts[qIdx]) return shuffledOpts[qIdx];
+  var q = questions[qIdx];
+  var seed = 0;
+  for (var k = 0; k < studentName.length; k++) seed += studentName.charCodeAt(k);
+  seed += qIdx * 37;
+  // Create index array [0,1,2,3] and shuffle it seeded
+  var idxArr = [0,1,2,3];
+  for (var i = idxArr.length - 1; i > 0; i--) {
+    var j = Math.floor(seededRand(seed, i) * (i + 1));
+    var tmp = idxArr[i]; idxArr[i] = idxArr[j]; idxArr[j] = tmp;
+  }
+  // idxArr[new_position] = original_index
+  // Find where the correct answer ended up
+  var newCorrect = idxArr.indexOf(q.a);
+  shuffledOpts[qIdx] = { order: idxArr, newCorrect: newCorrect };
+  return shuffledOpts[qIdx];
+}
+
+function renderQ(){
+  var q=questions[currentQ];
+  var answered=Object.keys(answers).length;
+  document.getElementById('progFill').style.width=(answered/questions.length*100)+'%';
+  document.getElementById('progTxt').textContent=answered+'/'+questions.length;
+  document.getElementById('btnPrev').disabled=(currentQ===0);
+  var isLast=currentQ===questions.length-1;
+  document.getElementById('btnNext').style.display=isLast?'none':'block';
+  document.getElementById('btnSubmit').style.display=isLast?'block':'none';
+  var col=TC[q.t]||'#3b82f6';
+  var ltrs=['A','B','C','D'];
+  var sh = getShuffledOpts(currentQ);
+  var optsHtml='';
+  for(var i=0;i<4;i++){
+    var origIdx = sh.order[i];
+    var sel=answers[currentQ]===i?'sel':'';
+    optsHtml+='<div class="opt '+sel+'" onclick="pickAns('+i+')"><div class="opt-l">'+ltrs[i]+'</div><span>'+q.opts[origIdx]+'</span></div>';
+  }
+  var isFlagged = flagged[currentQ] ? true : false;
+  var flagBtnClass = isFlagged ? 'flag-btn flagged' : 'flag-btn';
+  var flagBtnLabel = isFlagged ? '&#x1F6A9; Flagged &mdash; tap to unflag' : '&#x1F3F3;&#xFE0F; Flag for later';
+  document.getElementById('examBody').innerHTML=
+    '<div class="topic-tag" style="color:'+col+';">'+q.t+'</div>'+
+    '<div class="q-card">'+
+      '<div class="q-head"><div class="q-no">Q'+(currentQ+1)+'</div><div class="q-txt">'+q.q+'</div></div>'+
+      '<div class="opts">'+optsHtml+'</div>'+
+      '<button class="'+flagBtnClass+'" onclick="toggleFlag('+currentQ+')">'+
+        '<span class="flag-icon">&#x1F6A9;</span>'+flagBtnLabel+
+      '</button>'+
+    '</div>'+
+    '<div class="q-footer">Question '+(currentQ+1)+' of '+questions.length+'</div>';
+  renderFlagBar();
+  renderNavGrid();
+}
+
+function pickAns(i){if(submitted)return;answers[currentQ]=i;renderQ();}
+function nav(d){currentQ=Math.max(0,Math.min(questions.length-1,currentQ+d));renderQ();}
+
+function confirmSubmit(){
+  var u=questions.length-Object.keys(answers).length;
+  var msg=u>0?'You have '+u+' unanswered questions. Submit anyway?':'Submit your exam now? This cannot be undone.';
+  if(!confirm(msg))return;
+  doSubmit();
+}
+function autoSubmit(){alert('Time is up! Your exam has been submitted automatically.');doSubmit();}
+
+function doSubmit(){
+  clearInterval(timerInt);submitted=true;
+  var res=grade();
+  // Show a brief saving indicator
+  document.getElementById('examBody').innerHTML =
+    '<div style="text-align:center;padding:60px 20px;">' +
+    '<div style="font-size:28px;margin-bottom:16px;">&#x1F4BE;</div>' +
+    '<div style="font-size:16px;font-weight:600;color:#f1f5f9;">Saving your results...</div>' +
+    '<div style="font-size:13px;color:#94a3b8;margin-top:8px;">Please wait a moment</div>' +
+    '</div>';
+  storeResult(res, function(){
+    showResults(res);
+  });
+}
+
+function grade(){
+  var correct=0;
+  for(var i=0;i<questions.length;i++){
+    var sh=getShuffledOpts(i);
+    if(answers[i]===sh.newCorrect)correct++;
+  }
+  var wrong=Object.keys(answers).length-correct;
+  var skipped=questions.length-Object.keys(answers).length;
+  var pct=Math.round(correct/questions.length*100);
+  return{name:studentName,course:selectedCourse,correct:correct,wrong:wrong,skipped:skipped,total:questions.length,pct:pct,passed:pct>=PASS_MARK,timeTaken:EXAM_SECS-timeLeft,ts:Date.now()};
+}
+
+// ── SUPABASE CONFIG ──
+var SB_URL = 'https://yekcprytdramkxbvjbpv.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyjpc3MiOiJzdXBhYmFzZSIsInRvbGVuX3R5cGUiOiJhbm9uIiwiZXhwIjoxNzg5MzA5ZSI6ImFub24iLCJpYXQiOjE1ODEzNDMsImV2Y2ci6MjA5NzE0ODc0M30.9Cu1JywtksqxC66cKSplbFv4D045H4U--bnOdTpqY-Q';
+
+function sbHeaders(){
+  return {
+    'Content-Type':'application/json',
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Prefer': 'return=minimal'
+  };
+}
+
+// Save result to Supabase AND localStorage (fallback)
+function storeResult(r, callback){
+  // Always save locally as fallback
+  try{
+    var local = JSON.parse(localStorage.getItem('gm26')||'[]');
+    local = local.filter(function(x){return!(x.name.toLowerCase()===r.name.toLowerCase()&&x.course===r.course);});
+    local.push(r);
+    localStorage.setItem('gm26', JSON.stringify(local));
+  }catch(e){}
+
+  // Save to Supabase
+  var payload = {
+    name: r.name,
+    course: r.course,
+    score: r.pct,
+    correct: r.correct,
+    wrong: r.wrong,
+    skipped: r.skipped,
+    total: r.total,
+    passed: r.passed,
+    time_taken: r.timeTaken,
+    submitted_at: new Date().toISOString()
+  };
+
+  fetch(SB_URL + '/rest/v1/quiz_results', {
+    method: 'POST',
+    headers: sbHeaders(),
+    body: JSON.stringify(payload)
+  }).then(function(res){
+    if(res.ok){ console.log('Result saved to Supabase'); }
+    else{ res.text().then(function(t){ console.warn('Supabase save error:', t); }); }
+    if(callback) callback();
+  }).catch(function(err){
+    console.warn('Supabase offline, saved locally only:', err);
+    if(callback) callback();
+  });
+}
+
+// Load all results from Supabase for leaderboard (current course)
+function loadData(callback){
+  allResults = [];
+  fetch(SB_URL + '/rest/v1/quiz_results?select=*&order=score.desc', {
+    method: 'GET',
+    headers: sbHeaders()
+  }).then(function(res){ return res.json(); })
+  .then(function(rows){
+    allResults = rows.map(function(r){
+      return {
+        name: r.name,
+        course: r.course,
+        pct: r.score,
+        correct: r.correct,
+        wrong: r.wrong,
+        skipped: r.skipped,
+        total: r.total,
+        passed: r.passed,
+        timeTaken: r.time_taken,
+        ts: new Date(r.submitted_at).getTime()
+      };
+    });
+    if(callback) callback();
+  }).catch(function(err){
+    console.warn('Supabase offline, using localStorage:', err);
+    try{ allResults = JSON.parse(localStorage.getItem('gm26')||'[]'); }catch(e){ allResults=[]; }
+    if(callback) callback();
+  });
+}
+
+function getBy(f){
+  return allResults
+    .filter(function(r){ return f==='ALL'||r.course===f; })
+    .sort(function(a,b){ return b.pct - a.pct; });
+}
+
+function showResults(res){
+  goto('s4');
+  makeWatermark(res.name, 'resultsWatermark');
+  // Load fresh data from Supabase for accurate leaderboard
+  loadData(function(){
+    renderResultsContent(res);
+  });
+}
+
+function renderResultsContent(res){
+  buildWatermark();
+  document.getElementById('resName').textContent=res.name;
+  document.getElementById('stC').textContent=res.correct;
+  document.getElementById('stW').textContent=res.wrong;
+  document.getElementById('stS').textContent=res.skipped;
+  var rn=document.getElementById('ringNum');
+  rn.innerHTML=res.pct+'%<small>score</small>';
+  rn.style.color=res.passed?'#10b981':'#ef4444';
+  var bd=document.getElementById('resBadge');
+  bd.textContent=res.passed?'PASSED':'FAILED';
+  bd.className='r-badge '+(res.passed?'r-pass':'r-fail');
+  var msgs=['Don\'t give up - review topics and try again!','You passed - keep studying to improve!','Good effort - focus on weak areas!','Outstanding! Excellent preparation!'];
+  var mi=res.pct>=80?3:res.pct>=60?2:res.pct>=50?1:0;
+  document.getElementById('resMsg').textContent=msgs[mi];
+  setTimeout(function(){
+    document.getElementById('ringArc').style.strokeDashoffset=289-(res.pct/100)*289;
+    document.getElementById('ringArc').style.stroke=res.passed?'#10b981':'#ef4444';
+  },300);
+  document.getElementById('lbLabel').textContent=CL[res.course]||res.course;
+  var medals=['1st','2nd','3rd'];
+  var lbData=getBy(res.course);
+  var lbHtml='';
+  for(var i=0;i<lbData.length;i++){
+    var e=lbData[i];
+    var me=e.name.toLowerCase()===res.name.toLowerCase()&&e.course===res.course;
+    lbHtml+='<div class="lb-row'+(me?' me':'')+'">'+
+      '<div class="lb-rank">'+(i<3?medals[i]:'#'+(i+1))+'</div>'+
+      '<div class="lb-name">'+e.name+(me?' (you)':'')+'</div>'+
+      '<div class="lb-bar-w"><div class="lb-bar"><div class="lb-bar-f" style="width:'+e.pct+'%"></div></div></div>'+
+      '<div class="lb-pct" style="color:'+(e.passed?'#10b981':'#ef4444')+'">'+e.pct+'%</div>'+
+    '</div>';
+  }
+  document.getElementById('lbDiv').innerHTML=lbHtml||'<p style="font-size:12px;color:#475569;text-align:center;padding:12px;">No other results yet.</p>';
+  var ltrs=['A','B','C','D'];
+  var revHtml='';
+  for(var i=0;i<questions.length;i++){
+    var q=questions[i];var ua=answers[i];var ok=ua===q.a;var sk=ua===undefined;
+    var sc=sk?'#f59e0b':ok?'#10b981':'#ef4444';
+    var sl=sk?'Skipped':ok?'Correct':'Wrong';
+    var col=TC[q.t]||'#3b82f6';
+    var rows='';
+    var sh=getShuffledOpts(i);
+    for(var j=0;j<4;j++){
+      var origIdx=sh.order[j];
+      var bg='#1a2235',bc='transparent',fc='#94a3b8';
+      if(j===sh.newCorrect){bg='rgba(16,185,129,.1)';bc='#10b981';fc='#f1f5f9';}
+      if(j===ua&&j!==sh.newCorrect){bg='rgba(239,68,68,.1)';bc='#ef4444';fc='#f1f5f9';}
+      rows+='<div class="rev-opt" style="background:'+bg+';border-color:'+bc+';color:'+fc+';"><span style="font-family:monospace;font-weight:700;flex-shrink:0;">'+ltrs[j]+'</span><span>'+q.opts[origIdx]+'</span></div>';
+    }
+    revHtml+='<div class="rev-card" style="border-color:'+sc+'44;">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px;">'+
+        '<span style="font-size:10px;font-weight:700;color:'+col+';text-transform:uppercase;">'+q.t+'</span>'+
+        '<span style="font-size:11px;font-weight:600;color:'+sc+';">'+sl+'</span>'+
+      '</div>'+
+      '<div style="font-size:13px;line-height:1.65;margin-bottom:10px;">'+q.q+'</div>'+rows+
+    '</div>';
+  }
+  document.getElementById('revDiv').innerHTML=revHtml;
+}
+
+
+var adminRefreshInterval = null;
+var currentAdminFilter = 'ALL';
+
+function refreshAdmin(){
+  document.getElementById('lastRefresh').textContent = 'Refreshing...';
+  loadData(function(){
+    buildAdminContent(currentAdminFilter);
+    var now = new Date();
+    document.getElementById('lastRefresh').textContent =
+      'Last updated: ' + now.toLocaleTimeString();
+  });
+}
+
+function buildAdmin(f){
+  // Show loading state
+  document.getElementById('adminSum').innerHTML =
+    '<div style="grid-column:span 2;text-align:center;padding:20px;color:#94a3b8;font-size:13px;">&#x1F504; Loading results from database...</div>';
+  document.getElementById('adminTbl').innerHTML =
+    '<div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">&#x1F504; Fetching data...</div>';
+
+  currentAdminFilter = f;
+  loadData(function(){
+    buildAdminContent(f);
+    var now = new Date();
+    var el = document.getElementById('lastRefresh');
+    if(el) el.textContent = 'Last updated: ' + now.toLocaleTimeString();
+    // Auto-refresh every 30 seconds
+    if(adminRefreshInterval) clearInterval(adminRefreshInterval);
+    adminRefreshInterval = setInterval(function(){ refreshAdmin(); }, 30000);
+  });
+}
+
+function buildAdminContent(f){
+  currentAdminFilter = f;
+  var tot=allResults.length;
+  var pass=allResults.filter(function(r){return r.passed;}).length;
+  var avg=tot>0?Math.round(allResults.reduce(function(s,r){return s+r.pct;},0)/tot):0;
+  var n114=allResults.filter(function(r){return r.course==='DSSN114';}).length;
+  var n112=allResults.filter(function(r){return r.course==='DSSN112';}).length;
+  var n116=allResults.filter(function(r){return r.course==='DSGN116';}).length;
+  document.getElementById('adminSum').innerHTML=
+    '<div class="sum-card"><div class="sum-v" style="color:#3b82f6">'+tot+'</div><div class="sum-l">Total attempts</div></div>'+
+    '<div class="sum-card"><div class="sum-v" style="color:#10b981">'+pass+'</div><div class="sum-l">Passed</div></div>'+
+    '<div class="sum-card"><div class="sum-v" style="color:#f59e0b">'+avg+'%</div><div class="sum-l">Average score</div></div>'+
+    '<div class="sum-card"><div style="font-size:13px;font-weight:600;margin-bottom:4px;"><span style="color:#60a5fa;">114:</span> '+n114+' <span style="color:#34d399;">112:</span> '+n112+' <span style="color:#fb7185;">116:</span> '+n116+'</div><div class="sum-l">Per paper</div></div>';
+  buildTbl(f);
+}
+
+function filterA(f){
+  document.querySelectorAll('.f-btn').forEach(function(b){b.classList.toggle('on',b.dataset.f===f);});
+  // Reload fresh data then filter
+  loadData(function(){
+    buildTbl(f);
+  });
+}
+
+function buildTbl(f){
+  var rows=getBy(f);
+  var cc={DSSN114:{bg:'rgba(59,130,246,.15)',tx:'#60a5fa'},DSSN112:{bg:'rgba(16,185,129,.15)',tx:'#34d399'},DSGN116:{bg:'rgba(244,63,94,.15)',tx:'#fb7185'}};
+  function fmt(s){var m=Math.floor(s/60),sc=s%60;return m+'m '+String(sc).padStart(2,'0')+'s';}
+  var medals=['1','2','3'];
+  var html=rows.length===0?'<div style="padding:24px;text-align:center;color:#475569;font-size:13px;">No results yet.</div>':'';
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];var c=cc[r.course]||{bg:'#1a2235',tx:'#94a3b8'};
+    var lbl=r.course.replace(/([A-Z]+)(\d+)/,'$1 $2');
+    html+='<div class="tbl-row">'+
+      '<div style="font-size:12px;text-align:center;font-weight:600;">'+(i<3?medals[i]:'#'+(i+1))+'</div>'+
+      '<div style="font-size:12px;font-weight:500;">'+r.name+'</div>'+
+      '<div><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:'+c.bg+';color:'+c.tx+';">'+lbl+'</span></div>'+
+      '<div style="font-family:monospace;font-size:12px;font-weight:600;text-align:center;color:'+(r.passed?'#10b981':'#ef4444')+';">'+r.pct+'%<div style="font-size:9px;color:#475569;">'+r.correct+'/'+r.total+'</div></div>'+
+      '<div style="font-size:10px;font-weight:700;text-align:center;color:'+(r.passed?'#10b981':'#ef4444')+'">'+(r.passed?'PASS':'FAIL')+'</div>'+
+      '<div style="font-size:10px;color:#475569;font-family:monospace;">'+fmt(r.timeTaken||0)+'</div>'+
+    '</div>';
+  }
+  document.getElementById('adminTbl').innerHTML=html;
+}
+
+function adminOut(){
+  clearWatermark();
+  currentRole='';
+  document.getElementById('rb_s').classList.remove('picked');
+  document.getElementById('rb_a').classList.remove('picked');
+  document.getElementById('cont1').disabled=true;
+  goto('s1');
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('s2').classList.contains('active'))doLogin();
+});
+
+
+// WATERMARK
+function buildWatermark() {
+  var layers = ['wmInner','wmInner2'];
+  var repeat = studentName.toUpperCase() + ' · GREAT MINDS · ';
+  var html = '';
+  for(var i=0;i<120;i++) html += '<div class="wm-text">'+repeat+'</div>';
+  for(var k=0;k<layers.length;k++){
+    var el=document.getElementById(layers[k]);
+    if(el) el.innerHTML=html;
+  }
+}
+
+function clearWatermark() {
+  var layers = ['wmInner','wmInner2'];
+  for(var k=0;k<layers.length;k++){
+    var el=document.getElementById(layers[k]);
+    if(el) el.innerHTML='';
+  }
+}
+
+// INIT
+document.querySelectorAll('.screen').forEach(function(s){s.style.display='none';});
+document.getElementById('s1').style.display='flex';
+document.getElementById('s1').classList.add('active');
+
+// Disable right-click context menu during exam
+document.addEventListener('contextmenu', function(e){
+  if(document.getElementById('s3').classList.contains('active') ||
+     document.getElementById('s4').classList.contains('active')){
+    e.preventDefault();
+  }
+});
+
+// Disable text selection during exam
+document.addEventListener('selectstart', function(e){
+  if(document.getElementById('s3').classList.contains('active')){
+    e.preventDefault();
+  }
+});
+
+</script>
+</body>
+</html>
