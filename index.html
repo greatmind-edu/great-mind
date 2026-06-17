@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>GREAT MINDS — RGN Exam Portal</title>
+<script src="questions.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;background:#0a0f1e;color:#f1f5f9;min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.on{display:flex}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px}
+.card{background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:26px 20px;width:100%;max-width:400px}
+.logo{text-align:center;margin-bottom:24px}
+.logo-box{width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;box-shadow:0 0 30px rgba(59,130,246,.4)}
+.logo-name{font-size:22px;font-weight:700}
+.logo-tag{font-size:12px;color:#94a3b8;margin-top:3px}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.role-btn{padding:20px 10px;border-radius:14px;border:2px solid rgba(255,255,255,.1);background:#1a2235;cursor:pointer;text-align:center;transition:border-color .2s}
+.role-btn.picked{border-color:#3b82f6;background:rgba(59,130,246,.1)}
+.role-icon{font-size:26px;margin-bottom:8px}
+.role-name{font-size:14px;font-weight:600}
+.role-desc{font-size:11px;color:#94a3b8;margin-top:2px}
+.card-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.card-sub{font-size:13px;color:#94a3b8;margin-bottom:20px;line-height:1.5}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.field input,.field select{width:100%;padding:12px 14px;background:#1a2235;border:1.5px solid rgba(255,255,255,.1);border-radius:10px;color:#f1f5f9;font-family:Arial,sans-serif;font-size:14px;outline:none;-webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus{border-color:#3b82f6}
+.mono{font-family:monospace;letter-spacing:.08em}
+.btn{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#3b82f6,#06b6d4);border:none;border-radius:10px;color:#fff;font-family:Arial,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;box-shadow:0 4px 18px rgba(59,130,246,.3)}
+.btn:active{opacity:.85}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:none}
+.btn-outline{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);box-shadow:none;color:#94a3b8}
+.btn-sm{padding:8px 14px;font-size:12px;width:auto;display:inline-block}
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 4px 14px rgba(245,158,11,.25)}
+.back{text-align:center;margin-top:14px;font-size:13px;color:#475569;cursor:pointer}
+.err{display:none;font-size:12px;color:#ef4444;margin-top:8px;padding:9px 12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;text-align:center}
+/* TOPBAR */
+.topbar{background:rgba(10,15,30,.97);border-bottom:1px solid rgba(255,255,255,.07);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10}
+.top-name{font-size:11px;color:#64748b}
+.top-name b{display:block;font-size:13px;color:#f1f5f9}
+.timer{font-family:monospace;font-size:20px;font-weight:700;color:#10b981}
+.timer.warn{color:#f59e0b}
+.timer.red{color:#ef4444}
+.prog-bar{height:4px;background:#1a2235;border-radius:4px;width:60px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#06b6d4);border-radius:4px}
+.prog-txt{font-size:10px;color:#94a3b8;margin-top:3px;text-align:right}
+/* FLAG BAR */
+.flagbar{background:#0f172a;border-bottom:1px solid rgba(255,255,255,.06);padding:7px 14px;display:flex;align-items:center;gap:7px;overflow-x:auto;min-height:44px;flex-shrink:0}
+.flagbar::-webkit-scrollbar{display:none}
+.flag-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.flag-empty{font-size:11px;color:#334155;font-style:italic}
+.flag-chip{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#f59e0b;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.flag-chip .fx{font-size:12px;opacity:.7;margin-left:2px}
+/* EXAM BODY */
+.exam-scroll{flex:1;overflow-y:auto;padding:16px 14px 170px;max-width:680px;width:100%;margin:0 auto}
+.topic-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.qcard{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px}
+.qhead{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px}
+.qnum{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;flex-shrink:0;margin-top:2px;font-family:monospace}
+.qtxt{font-size:14px;line-height:1.65}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:10px;align-items:center;padding:11px 13px;background:#1a2235;border:1.5px solid rgba(255,255,255,.07);border-radius:10px;cursor:pointer;font-size:13px;color:#94a3b8;line-height:1.4;transition:border-color .15s}
+.opt.sel{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#f1f5f9}
+.opt-l{width:25px;height:25px;border-radius:6px;background:#0f172a;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;flex-shrink:0}
+.opt.sel .opt-l{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.flag-btn{display:flex;align-items:center;gap:6px;margin-top:12px;padding:7px 12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.08);background:#1a2235;color:#64748b;font-family:Arial,sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.flag-btn.on{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b}
+.qfoot{text-align:center;font-size:11px;color:#334155;margin-top:8px}
+/* NAV GRID */
+.navgrid-wrap{background:#0f172a;border-top:1px solid rgba(255,255,255,.06);padding:8px 14px;flex-shrink:0}
+.navgrid{display:flex;flex-wrap:wrap;gap:5px;max-width:680px;margin:0 auto}
+.nd{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:monospace;cursor:pointer;border:1.5px solid rgba(255,255,255,.08);background:#1a2235;color:#475569;flex-shrink:0}
+.nd.ans{background:rgba(59,130,246,.15);border-color:#3b82f6;color:#93c5fd}
+.nd.flag{background:rgba(245,158,11,.12);border-color:#f59e0b;color:#f59e0b}
+.nd.cur{background:#3b82f6;border-color:#3b82f6;color:#fff}
+/* BOTTOM NAV */
+.botnav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:rgba(10,15,30,.98);border-top:1px solid rgba(255,255,255,.07);padding:10px 14px}
+.botnav-inner{display:flex;gap:8px;max-width:680px;margin:0 auto}
+.botnav-inner .btn{flex:1;padding:10px;font-size:13px;margin-top:0}
+/* WATERMARK */
+.wm{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.wm-txt{position:absolute;color:rgba(255,255,255,.055);font-size:16px;font-weight:700;white-space:nowrap;transform:rotate(-35deg);user-select:none;text-transform:uppercase;letter-spacing:2px}
+/* RESULTS */
+.res-scroll{flex:1;overflow-y:auto;padding:20px 14px 36px;max-width:680px;width:100%;margin:0 auto}
+.res-hero{text-align:center;padding:26px 16px 20px;background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:18px;margin-bottom:14px}
+.ring-wrap{width:100px;height:100px;margin:0 auto 14px;position:relative}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-wrap circle{fill:none;stroke-width:8;stroke-linecap:round}
+.ring-bg{stroke:#1a2235}
+.ring-fill{transition:stroke-dashoffset 1.2s ease}
+.ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+.ring-num small{font-size:10px;color:#94a3b8;font-weight:400}
+.res-name{font-size:17px;font-weight:700;margin-bottom:5px}
+.rbadge{display:inline-block;padding:3px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:8px}
+.rpass{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.rfail{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.sbox{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 8px;text-align:center}
+.sbox-v{font-size:22px;font-weight:700}
+.sbox-l{font-size:10px;color:#94a3b8;margin-top:2px}
+.sec{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin:4px 0 8px}
+.lb-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:10px;margin-bottom:6px}
+.lb-row.me{border-color:#3b82f6;background:rgba(59,130,246,.06)}
+.lb-rank{font-family:monospace;font-size:12px;width:22px;text-align:center;flex-shrink:0}
+.lb-name{flex:1;font-size:13px;font-weight:500}
+.lb-bar{height:3px;background:#1a2235;border-radius:3px;overflow:hidden;width:44px;flex-shrink:0}
+.lb-bar-f{height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+.lb-pct{font-family:monospace;font-size:12px;font-weight:600;min-width:34px;text-align:right}
+.rev-card{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:8px}
+.rev-opt{padding:7px 10px;border-radius:7px;font-size:12px;display:flex;gap:7px;margin-bottom:4px;border:1px solid transparent;line-height:1.4}
+/* ADMIN */
+.admin-top{background:#111827;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.admin-logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.admin-scroll{flex:1;overflow-y:auto;padding:16px 14px 30px;max-width:900px;width:100%;margin:0 auto}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.sum-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px}
+.sum-v{font-size:24px;font-weight:700;margin-bottom:2px}
+.sum-l{font-size:11px;color:#94a3b8}
+.frow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.fbtn{padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:#1a2235;color:#94a3b8;font-size:12px;cursor:pointer;font-family:Arial,sans-serif}
+.fbtn.on{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#f1f5f9}
+.tbl{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden}
+.th{display:grid;grid-template-columns:30px 1fr 72px 64px 48px 56px;gap:6px;padding:9px 12px;background:#1a2235;border-bottom:1px solid rgba(255,255,255,.07)}
+.th span{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase}
+.tr{display:grid;grid-template-columns:30px 1fr 72px 64px 48px 56px;gap:6px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center}
+.tr:last-child{border-bottom:none}
+@media(max-width:380px){.th,.tr{grid-template-columns:26px 1fr 58px 50px 40px}.th span:last-child,.tr .tt{display:none}}
+/* SETTINGS */
+.set-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.set-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.set-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.sb114{background:rgba(59,130,246,.15);color:#60a5fa}
+.sb112{background:rgba(16,185,129,.15);color:#34d399}
+.sb116{background:rgba(244,63,94,.15);color:#fb7185}
+.set-status{font-size:11px;color:#475569}
+.set-status.ok{color:#10b981}
+.set-status.err{color:#ef4444}
+.set-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.set-field label{display:block;font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.set-field input{width:100%;padding:8px 10px;background:#0f172a;border:1.5px solid rgba(255,255,255,.08);border-radius:8px;color:#f1f5f9;font-family:monospace;font-size:13px;outline:none}
+.set-field input:focus{border-color:#3b82f6}
+.set-save{width:100%;padding:9px;border:none;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-family:Arial,sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.set-save:disabled{opacity:.4;cursor:not-allowed}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:16px 0}
+.refresh-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.refresh-time{font-size:11px;color:#334155}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.red{animation:blink 1s infinite}
+</style>
+</head>
+<body>
+
+<!-- S1: HOME -->
+<div id="s1" class="screen on">
+  <div class="center">
+    <div class="logo">
+      <div class="logo-box">&#x1F9E0;</div>
+      <div class="logo-name">GREAT MINDS</div>
+      <div class="logo-tag">RGN Exam Portal &middot; KNUST 2026</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Welcome &#x1F44B;</div>
+      <div class="card-sub">Select your role then tap Continue.</div>
+      <div class="role-grid">
+        <div class="role-btn" id="rb_s" onclick="pickRole('student')">
+          <div class="role-icon">&#x1F4DA;</div>
+          <div class="role-name">Student</div>
+          <div class="role-desc">Take an exam</div>
+        </div>
+        <div class="role-btn" id="rb_a" onclick="pickRole('admin')">
+          <div class="role-icon">&#x1F6E1;&#xFE0F;</div>
+          <div class="role-name">Admin</div>
+          <div class="role-desc">View dashboard</div>
+        </div>
+      </div>
+      <button class="btn" id="cont1" onclick="gotoLogin()" disabled>Continue &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- S2: LOGIN -->
+<div id="s2" class="screen">
+  <div class="center">
+    <div class="logo">
+      <div class="logo-box">&#x1F9E0;</div>
+      <div class="logo-name">GREAT MINDS</div>
+    </div>
+    <div class="card">
+      <div id="fStu">
+        <div class="card-title">Student Login</div>
+        <div class="card-sub">Enter your name, select your paper and enter the course password.</div>
+        <div class="field"><label>Full Name</label><input type="text" id="iName" placeholder="e.g. Abena Mensah" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Select Course</label>
+          <select id="iCourse">
+            <option value="">&#x2014; Choose paper &#x2014;</option>
+            <option value="DSSN114">DSSN 114 &middot; Medical-Surgical Nursing</option>
+            <option value="DSSN112">DSSN 112 &middot; Public Health &amp; Mental Health</option>
+            <option value="DSGN116">DSGN 116 &middot; Obstetrics &amp; Paediatrics</option>
+          </select>
+        </div>
+        <div class="field"><label>Exam Password</label><input type="password" id="iPass" class="mono" placeholder="Course password" autocomplete="off"></div>
+      </div>
+      <div id="fAdm" style="display:none">
+        <div class="card-title">Admin Login</div>
+        <div class="card-sub">Enter your admin password.</div>
+        <div class="field"><label>Admin Password</label><input type="password" id="iAdmPw" class="mono" placeholder="Admin password" autocomplete="off"></div>
+      </div>
+      <div class="err" id="loginErr"></div>
+      <button class="btn" id="loginBtn" onclick="doLogin()">Login &rarr;</button>
+      <div class="back" onclick="gotoHome()">&larr; Back</div>
+    </div>
+  </div>
+</div>
+
+<!-- S3: EXAM -->
+<div id="s3" class="screen">
+  <div class="wm" id="wm"></div>
+  <div class="topbar">
+    <div class="top-name"><span>Candidate</span><b id="topName"></b></div>
+    <div style="text-align:center"><div class="timer" id="timerEl">30:00</div><div style="font-size:10px;color:#475569">remaining</div></div>
+    <div><div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div><div class="prog-txt" id="progTxt">0/60</div></div>
+  </div>
+  <div class="flagbar" id="flagBar"><span class="flag-label">&#x1F6A9; Flagged:</span><span class="flag-empty" id="flagEmpty">None</span></div>
+  <div class="exam-scroll" id="examBody"></div>
+  <div class="navgrid-wrap"><div class="navgrid" id="navGrid"></div></div>
+  <div class="botnav"><div class="botnav-inner">
+    <button class="btn btn-outline" id="bPrev" onclick="nav(-1)">&larr; Prev</button>
+    <button class="btn" id="bNext" onclick="nav(1)">Next &rarr;</button>
+    <button class="btn btn-danger" id="bSub" style="display:none" onclick="doConfirmSub()">Submit</button>
+  </div></div>
+</div>
+
+<!-- S4: RESULTS -->
+<div id="s4" class="screen">
+  <div class="wm" id="wm2"></div>
+  <div class="res-scroll">
+    <div class="res-hero">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 100 100" width="100" height="100">
+          <circle class="ring-bg" cx="50" cy="50" r="42"/>
+          <circle class="ring-fill" id="ringArc" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264" stroke="#3b82f6"/>
+        </svg>
+        <div class="ring-num" id="ringNum">0%<small>score</small></div>
+      </div>
+      <div class="res-name" id="resName"></div>
+      <div class="rbadge" id="resBadge"></div>
+      <p style="font-size:13px;color:#94a3b8;line-height:1.5;max-width:280px;margin:0 auto" id="resMsg"></p>
+    </div>
+    <div class="srow">
+      <div class="sbox"><div class="sbox-v" id="stC" style="color:#10b981">0</div><div class="sbox-l">Correct</div></div>
+      <div class="sbox"><div class="sbox-v" id="stW" style="color:#ef4444">0</div><div class="sbox-l">Wrong</div></div>
+      <div class="sbox"><div class="sbox-v" id="stS" style="color:#f59e0b">0</div><div class="sbox-l">Skipped</div></div>
+    </div>
+    <div class="sec">&#x1F3C6; Rankings &mdash; <span id="lbLabel"></span></div>
+    <div id="lbDiv" style="margin-bottom:16px"></div>
+    <div class="sec">&#x1F4CB; Question Review</div>
+    <div id="revDiv"></div>
+  </div>
+</div>
+
+<!-- S5: ADMIN -->
+<div id="s5" class="screen">
+  <div class="admin-top">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="admin-logo">&#x1F6E1;&#xFE0F;</div>
+      <div><div style="font-size:14px;font-weight:700">Admin Dashboard</div><div style="font-size:11px;color:#94a3b8">GREAT MINDS &middot; RGN Exam Portal</div></div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="admOut()">Logout</button>
+  </div>
+  <div class="admin-scroll">
+    <!-- SETTINGS -->
+    <div class="sec" style="display:flex;align-items:center;justify-content:space-between">
+      <span>&#x2699;&#xFE0F; Exam Settings</span>
+      <button onclick="loadSettings()" style="padding:4px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:#1a2235;color:#94a3b8;font-size:11px;cursor:pointer;font-family:Arial,sans-serif">&#x1F504; Reload</button>
+    </div>
+    <div id="settingsDiv"><div style="color:#475569;font-size:13px;padding:8px">Loading settings...</div></div>
+    <div class="divider"></div>
+    <!-- RESULTS -->
+    <div class="refresh-row">
+      <span class="refresh-time" id="refreshTime">Loading...</span>
+      <button onclick="admRefresh()" style="padding:5px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:#1a2235;color:#94a3b8;font-size:12px;cursor:pointer;font-family:Arial,sans-serif">&#x1F504; Refresh</button>
+    </div>
+    <div class="sum-grid" id="admSum"></div>
+    <div class="frow">
+      <button class="fbtn on" data-f="ALL" onclick="admFilter('ALL')">All Papers</button>
+      <button class="fbtn" data-f="DSSN114" onclick="admFilter('DSSN114')">DSSN 114</button>
+      <button class="fbtn" data-f="DSSN112" onclick="admFilter('DSSN112')">DSSN 112</button>
+      <button class="fbtn" data-f="DSGN116" onclick="admFilter('DSGN116')">DSGN 116</button>
+    </div>
+    <div class="tbl">
+      <div class="th"><span>#</span><span>Name</span><span>Paper</span><span>Score</span><span>Status</span><span>Time</span></div>
+      <div id="admTbl"></div>
+    </div>
+    <p style="font-size:11px;color:#334155;text-align:center;margin-top:12px">Screenshot to save results. Data stored in Supabase.</p>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+var ADMIN_PW  = 'ADMIN@GREATMINDS2026';
+var PASS_MARK = 50;
+var SB_URL    = 'https://yekcprytdramkxbvjbpv.supabase.co';
+var SB_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyjpc3MiOiJzdXBhYmFzZSIsInRvbGVuX3R5cGUiOiJhbm9uIiwiZXhwIjoxNzg5MzA5ZSI6ImFub24iLCJpYXQiOjE1ODEzNDMsImV2Y2ci6MjA5NzE0ODc0M30.9Cu1JywtksqxC66cKSplbFv4D045H4U--bnOdTpqY-Q';
+
+// Live settings (defaults overridden from Supabase)
+var S = {
+  DSSN114:{pw:'MEDSURG2026',secs:1800},
+  DSSN112:{pw:'PUBMENTALHEALTH2026',secs:1800},
+  DSGN116:{pw:'OBSPEDS2026',secs:1800}
+};
+
+function sbH(){
+  return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+}
+
+// ── SCREEN ──────────────────────────────────────────────────────
+function show(id){
+  var all=['s1','s2','s3','s4','s5'];
+  for(var i=0;i<all.length;i++){
+    var el=document.getElementById(all[i]);
+    el.classList.remove('on');
+    el.style.display='none';
+  }
+  var t=document.getElementById(id);
+  t.style.display='flex';
+  t.classList.add('on');
+  window.scrollTo(0,0);
+}
+
+// ── ROLE / LOGIN ────────────────────────────────────────────────
+var role='', sName='', sCourse='';
+var questions=[], answers={}, flagged={}, curQ=0;
+var timerInt=null, timeLeft=0, submitted=false;
+var allResults=[];
+var admRefInt=null, admCurFilter='ALL';
+
+function pickRole(r){
+  role=r;
+  document.getElementById('rb_s').classList.toggle('picked',r==='student');
+  document.getElementById('rb_a').classList.toggle('picked',r==='admin');
+  document.getElementById('cont1').disabled=false;
+}
+
+function gotoLogin(){
+  if(!role)return;
+  document.getElementById('fStu').style.display=role==='student'?'block':'none';
+  document.getElementById('fAdm').style.display=role==='admin'?'block':'none';
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('iName').value='';
+  document.getElementById('iPass').value='';
+  document.getElementById('iAdmPw').value='';
+  document.getElementById('iCourse').value='';
+  show('s2');
+}
+
+function gotoHome(){
+  role='';
+  document.getElementById('rb_s').classList.remove('picked');
+  document.getElementById('rb_a').classList.remove('picked');
+  document.getElementById('cont1').disabled=true;
+  show('s1');
+}
+
+function showErr(m){
+  var e=document.getElementById('loginErr');
+  e.textContent=m; e.style.display='block';
+}
+
+function doLogin(){
+  document.getElementById('loginErr').style.display='none';
+  if(role==='admin'){
+    var pw=document.getElementById('iAdmPw').value.trim();
+    if(pw!==ADMIN_PW){showErr('Incorrect admin password.');return;}
+    show('s5');
+    loadSettings();
+    admLoad(admCurFilter);
+    return;
+  }
+  var name=document.getElementById('iName').value.trim();
+  var course=document.getElementById('iCourse').value;
+  var pw=document.getElementById('iPass').value.trim().replace(/\s/g,'').toUpperCase();
+  if(!name){showErr('Please enter your full name.');return;}
+  if(!course){showErr('Please select your course paper.');return;}
+  var btn=document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='Checking...';
+  fetchSettings(function(){
+    btn.disabled=false; btn.textContent='Login \u2192';
+    var cfg=S[course];
+    if(!cfg){showErr('Invalid course.');return;}
+    var correctPw=(cfg.pw||'MEDSURG2026').toUpperCase().replace(/\s/g,'');
+    if(pw!==correctPw){
+      showErr('Incorrect password for this course.');return;
+    }
+    sName=name; sCourse=course;
+    var secs=cfg.secs||1800;
+    startExam(secs);
+  });
+}
+
+// ── SETTINGS ────────────────────────────────────────────────────
+function fetchSettings(cb){
+  // Always fetch FRESH from Supabase — this is the source of truth
+  fetch(SB_URL+'/rest/v1/exam_settings?select=course_code,timer_value,exam_password',{
+    headers:sbH(),
+    cache:'no-store'
+  })
+  .then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(rows){
+    if(Array.isArray(rows) && rows.length>0){
+      rows.forEach(function(row){
+        // Try multiple format matches for course_code
+        var raw = (row.course_code||'').trim();
+        // Try: DSSN_114 -> DSSN114, or DSSN 114 -> DSSN114
+        var code = raw.replace(/[_\s]/g,'');
+        // Also try uppercase
+        code = code.toUpperCase();
+        // Fallback mappings
+        var map={'DSSN114':'DSSN114','DSSN112':'DSSN112','DSGN116':'DSGN116',
+                 'DSSN_114':'DSSN114','DSSN_112':'DSSN112','DSGN_116':'DSGN116'};
+        var finalCode = map[raw] || map[code] || code;
+        if(S[finalCode]){
+          var mins = parseInt(row.timer_value,10);
+          if(!isNaN(mins) && mins>0){
+            S[finalCode].secs = mins*60;
+          }
+          if(row.exam_password && row.exam_password.trim().length>0){
+            S[finalCode].pw = row.exam_password.trim().toUpperCase();
+          }
+        }
+      });
+      saveSettingsToLocal();
+    } else {
+      // No rows from Supabase, fall back to localStorage
+      loadSettingsFromLocal();
+    }
+    if(cb)cb();
+  })
+  .catch(function(err){
+    console.warn('Supabase fetch failed:',err);
+    // Fall back to localStorage
+    loadSettingsFromLocal();
+    if(cb)cb();
+  });
+}
+
+function saveSettingsToLocal(){
+  try{
+    var obj={};
+    ['DSSN114','DSSN112','DSGN116'].forEach(function(c){
+      obj[c]={pw:S[c].pw, secs:S[c].secs};
+    });
+    localStorage.setItem('gm_settings', JSON.stringify(obj));
+  }catch(e){}
+}
+
+function loadSettingsFromLocal(){
+  try{
+    var raw=localStorage.getItem('gm_settings');
+    if(!raw) return;
+    var obj=JSON.parse(raw);
+    ['DSSN114','DSSN112','DSGN116'].forEach(function(c){
+      if(obj[c]){
+        if(obj[c].pw)   S[c].pw   = obj[c].pw;
+        if(obj[c].secs) S[c].secs = obj[c].secs;
+      }
+    });
+  }catch(e){}
+}
+
+function loadSettings(){
+  document.getElementById('settingsDiv').innerHTML='<div style="color:#475569;font-size:13px;padding:8px">&#x1F504; Loading...</div>';
+  // Show localStorage values immediately while Supabase loads
+  loadSettingsFromLocal();
+  renderSettings();
+  // Then fetch fresh from Supabase and re-render
+  fetchSettings(function(){renderSettings();});
+}
+
+function renderSettings(){
+  var courses=[
+    {code:'DSSN114',label:'DSSN 114 Med-Surg',cls:'sb114'},
+    {code:'DSSN112',label:'DSSN 112 PH & Mental Health',cls:'sb112'},
+    {code:'DSGN116',label:'DSGN 116 Obs & Paeds',cls:'sb116'}
+  ];
+  var h='';
+  courses.forEach(function(c){
+    var cfg=S[c.code]||{};
+    var mins=Math.round((cfg.secs||1800)/60);
+    h+='<div class="set-card">'+
+      '<div class="set-hd">'+
+        '<span class="set-badge '+c.cls+'">'+c.code.slice(0,4)+' '+c.code.slice(4)+'</span>'+
+        '<span class="set-status" id="ss_'+c.code+'">Loaded</span>'+
+      '</div>'+
+      '<div style="font-size:11px;color:#475569;margin-bottom:10px">'+c.label+'</div>'+
+      '<div class="set-row">'+
+        '<div class="set-field"><label>&#x23F1; Timer (mins)</label><input type="number" id="st_'+c.code+'" value="'+mins+'" min="5" max="180"></div>'+
+        '<div class="set-field"><label>&#x1F511; Password</label><input type="text" id="sp_'+c.code+'" value="'+(cfg.pw||'')+'" autocomplete="off" spellcheck="false"></div>'+
+      '</div>'+
+      '<button class="set-save" id="ssb_'+c.code+'" onclick="saveSetting(\''+c.code+'\')">&#x1F4BE; Save '+c.code.slice(0,4)+' '+c.code.slice(4)+'</button>'+
+    '</div>';
+  });
+  document.getElementById('settingsDiv').innerHTML=h;
+}
+
+function saveSetting(code){
+  var mins=parseInt(document.getElementById('st_'+code).value);
+  var pw=(document.getElementById('sp_'+code).value||'').trim().toUpperCase();
+  var stat=document.getElementById('ss_'+code);
+  var btn=document.getElementById('ssb_'+code);
+  if(!mins||mins<5||mins>180){stat.textContent='Timer: 5-180 mins';stat.className='set-status err';return;}
+  if(pw.length<3){stat.textContent='Password too short';stat.className='set-status err';return;}
+  btn.disabled=true; btn.textContent='Saving...';
+  stat.textContent='Saving...'; stat.className='set-status';
+  var sbCode=code.slice(0,4)+'_'+code.slice(4);
+  fetch(SB_URL+'/rest/v1/exam_settings?course_code=eq.'+encodeURIComponent(sbCode),{
+    method:'PATCH',
+    headers:Object.assign({'Prefer':'return=minimal'},sbH()),
+    body:JSON.stringify({exam_password:pw,timer_value:mins})
+  })
+  .then(function(r){
+    if(r.ok||r.status===204){
+      S[code].pw=pw; S[code].secs=mins*60;
+      saveSettingsToLocal(); // persist to localStorage immediately
+      stat.textContent='\u2705 Saved!'; stat.className='set-status ok';
+      setTimeout(function(){stat.textContent='Live';stat.className='set-status ok';},3000);
+    } else {
+      stat.textContent='\u274c Error '+r.status; stat.className='set-status err';
+    }
+    btn.disabled=false; btn.textContent='\uD83D\uDCBE Save '+code.slice(0,4)+' '+code.slice(4);
+  })
+  .catch(function(e){
+    // Supabase failed but still save locally so student portal picks it up
+    S[code].pw=pw; S[code].secs=mins*60;
+    saveSettingsToLocal();
+    stat.textContent='\u26A0\uFE0F Saved locally (Supabase offline)';
+    stat.className='set-status ok';
+    setTimeout(function(){stat.textContent='Local only';stat.className='set-status ok';},4000);
+    btn.disabled=false; btn.textContent='\uD83D\uDCBE Save '+code.slice(0,4)+' '+code.slice(4);
+  });
+}
+
+// ── EXAM ────────────────────────────────────────────────────────
+var TC={'Surgical Nursing':'#3b82f6','Medical Nursing':'#0ea5e9','Pharmacology':'#f97316','Nursing Process':'#84cc16','Basic Nursing':'#06b6d4','Advanced Nursing':'#8b5cf6','Professional':'#ec4899','Mental Health':'#a855f7','Public Health':'#10b981','Research':'#14b8a6','Obstetric':'#f43f5e','Paediatric':'#f59e0b','Child Protection':'#ef4444','Vascular':'#38bdf8','Cardiac':'#f43f5e','Respiratory':'#4ade80','GI Surgery':'#fb923c','Abdominal Surgery':'#fb923c','Perioperative':'#a78bfa','Oncology':'#f472b6','Pain Management':'#fbbf24','Trauma':'#94a3b8','Neurological':'#818cf8','Burns':'#f97316','Orthopaedic':'#2dd4bf','Ophthalmology':'#60a5fa','Endocrine':'#34d399','Fluid Balance':'#38bdf8','ENT':'#a3e635'};
+var CL={DSSN114:'DSSN 114 Med-Surg',DSSN112:'DSSN 112 PH & Mental Health',DSGN116:'DSGN 116 Obs & Paeds'};
+
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+function startExam(secs){
+  if(!QB){alert('Questions not loaded. Please refresh.');return;}
+  var pool=QB[sCourse];
+  if(!pool||!pool.length){alert('No questions found for this paper.');return;}
+  questions=shuffle(pool).slice(0,60);
+  // Shuffle options per question keeping correct answer
+  questions=questions.map(function(q){
+    var idx=[0,1,2,3];
+    for(var i=3;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+    var newOpts=idx.map(function(i){return q.o[i];});
+    var newA=idx.indexOf(q.a);
+    return{q:q.q,o:newOpts,a:newA,t:q.t};
+  });
+  answers={}; flagged={}; curQ=0; submitted=false; timeLeft=secs;
+  document.getElementById('topName').textContent=sName;
+  show('s3');
+  makeWM(sName,'wm');
+  renderQ();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    timeLeft--;
+    tickTimer();
+    if(timeLeft<=0){clearInterval(timerInt);autoSub();}
+  },1000);
+}
+
+function tickTimer(){
+  var m=String(Math.floor(timeLeft/60)).padStart(2,'0');
+  var s=String(timeLeft%60).padStart(2,'0');
+  var el=document.getElementById('timerEl');
+  el.textContent=m+':'+s;
+  el.className='timer';
+  if(timeLeft<=300)el.className='timer warn';
+  if(timeLeft<=60)el.className='timer red';
+}
+
+function renderQ(){
+  var q=questions[curQ];
+  var done=Object.keys(answers).length;
+  document.getElementById('progFill').style.width=Math.round(done/questions.length*100)+'%';
+  document.getElementById('progTxt').textContent=done+'/'+questions.length;
+  document.getElementById('bPrev').disabled=(curQ===0);
+  var last=(curQ===questions.length-1);
+  document.getElementById('bNext').style.display=last?'none':'block';
+  document.getElementById('bSub').style.display=last?'block':'none';
+  var col=TC[q.t]||'#94a3b8';
+  var L=['A','B','C','D'];
+  var opH='';
+  for(var i=0;i<4;i++){
+    var sel=(answers[curQ]===i)?'sel':'';
+    opH+='<div class="opt '+sel+'" onclick="pickA('+i+')"><div class="opt-l">'+L[i]+'</div><span>'+q.o[i]+'</span></div>';
+  }
+  var isFl=!!flagged[curQ];
+  document.getElementById('examBody').innerHTML=
+    '<div class="topic-tag" style="color:'+col+'">'+q.t+'</div>'+
+    '<div class="qcard">'+
+      '<div class="qhead"><div class="qnum">Q'+(curQ+1)+'</div><div class="qtxt">'+q.q+'</div></div>'+
+      '<div class="opts">'+opH+'</div>'+
+      '<button class="flag-btn'+(isFl?' on':'')+'" onclick="toggleFlag('+curQ+')">'+
+        '&#x1F6A9; '+(isFl?'Flagged &mdash; tap to unflag':'Flag for later')+
+      '</button>'+
+    '</div>'+
+    '<div class="qfoot">Question '+(curQ+1)+' of '+questions.length+'</div>';
+  renderFlagBar();
+  renderNavGrid();
+}
+
+function pickA(i){if(submitted)return;answers[curQ]=i;renderQ();}
+function nav(d){curQ=Math.max(0,Math.min(questions.length-1,curQ+d));renderQ();}
+function jumpTo(i){curQ=i;renderQ();}
+
+function toggleFlag(i){
+  if(flagged[i])delete flagged[i];else flagged[i]=true;
+  renderQ();
+}
+function removeFlag(i){delete flagged[i];renderFlagBar();renderNavGrid();renderQ();}
+
+function renderFlagBar(){
+  var bar=document.getElementById('flagBar');
+  var em=document.getElementById('flagEmpty');
+  var keys=Object.keys(flagged).map(Number).sort(function(a,b){return a-b;});
+  bar.querySelectorAll('.flag-chip').forEach(function(c){c.remove();});
+  if(!keys.length){em.style.display='inline';return;}
+  em.style.display='none';
+  keys.forEach(function(k){
+    var c=document.createElement('div');
+    c.className='flag-chip';
+    c.innerHTML='&#x1F6A9; Q'+(k+1)+' <span class="fx" onclick="event.stopPropagation();removeFlag('+k+')">&#x2715;</span>';
+    c.addEventListener('click',function(){jumpTo(k);});
+    bar.appendChild(c);
+  });
+}
+
+function renderNavGrid(){
+  var g=document.getElementById('navGrid');
+  g.innerHTML='';
+  for(var i=0;i<questions.length;i++){
+    var d=document.createElement('div');
+    d.className='nd';
+    if(i===curQ)d.classList.add('cur');
+    else if(flagged[i])d.classList.add('flag');
+    else if(answers[i]!==undefined)d.classList.add('ans');
+    d.textContent=i+1;
+    (function(idx){d.addEventListener('click',function(){jumpTo(idx);});})(i);
+    g.appendChild(d);
+  }
+}
+
+function doConfirmSub(){
+  var u=questions.length-Object.keys(answers).length;
+  var msg=u>0?'You have '+u+' unanswered question(s). Submit anyway?':'Submit your exam now?';
+  if(!confirm(msg))return;
+  submitExam();
+}
+function autoSub(){alert('Time is up! Your exam has been submitted.');submitExam();}
+
+function submitExam(){
+  clearInterval(timerInt);
+  submitted=true;
+  var res=grade();
+  document.getElementById('examBody').innerHTML=
+    '<div style="text-align:center;padding:50px 20px">'+
+    '<div style="font-size:26px;margin-bottom:12px">&#x1F4BE;</div>'+
+    '<div style="font-size:15px;font-weight:600">Saving your result...</div>'+
+    '<div style="font-size:12px;color:#94a3b8;margin-top:6px">Please wait</div></div>';
+  saveResult(res,function(){showResults(res);});
+}
+
+function grade(){
+  var correct=0;
+  questions.forEach(function(q,i){if(answers[i]===q.a)correct++;});
+  var wrong=Object.keys(answers).length-correct;
+  var skipped=questions.length-Object.keys(answers).length;
+  var pct=Math.round(correct/questions.length*100);
+  return{name:sName,course:sCourse,correct:correct,wrong:wrong,skipped:skipped,total:questions.length,pct:pct,passed:pct>=PASS_MARK,timeTaken:(S[sCourse]?S[sCourse].secs:1800)-timeLeft,ts:Date.now()};
+}
+
+// ── SUPABASE RESULTS ────────────────────────────────────────────
+function saveResult(r,cb){
+  try{
+    var loc=JSON.parse(localStorage.getItem('gm_res')||'[]');
+    loc=loc.filter(function(x){return!(x.name.toLowerCase()===r.name.toLowerCase()&&x.course===r.course);});
+    loc.push(r);
+    localStorage.setItem('gm_res',JSON.stringify(loc));
+  }catch(e){}
+  fetch(SB_URL+'/rest/v1/quiz_results',{
+    method:'POST',
+    headers:Object.assign({'Prefer':'return=minimal'},sbH()),
+    body:JSON.stringify({name:r.name,course:r.course,score:r.pct,correct:r.correct,wrong:r.wrong,skipped:r.skipped,total:r.total,passed:r.passed,time_taken:r.timeTaken,submitted_at:new Date().toISOString()})
+  })
+  .then(function(res){if(cb)cb();})
+  .catch(function(){if(cb)cb();});
+}
+
+function loadResults(f,cb){
+  allResults=[];
+  fetch(SB_URL+'/rest/v1/quiz_results?select=*&order=score.desc',{headers:sbH()})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if(Array.isArray(rows)){
+      allResults=rows.map(function(r){return{name:r.name,course:r.course,pct:r.score,correct:r.correct,wrong:r.wrong,skipped:r.skipped,total:r.total,passed:r.passed,timeTaken:r.time_taken,ts:new Date(r.submitted_at).getTime()};});
+    }
+    if(cb)cb();
+  })
+  .catch(function(){
+    try{allResults=JSON.parse(localStorage.getItem('gm_res')||'[]');}catch(e){allResults=[];}
+    if(cb)cb();
+  });
+}
+
+function getBy(f){return allResults.filter(function(r){return f==='ALL'||r.course===f;}).sort(function(a,b){return b.pct-a.pct;});}
+
+// ── RESULTS SCREEN ──────────────────────────────────────────────
+function showResults(res){
+  show('s4');
+  makeWM(res.name,'wm2');
+  document.getElementById('resName').textContent=res.name;
+  document.getElementById('stC').textContent=res.correct;
+  document.getElementById('stW').textContent=res.wrong;
+  document.getElementById('stS').textContent=res.skipped;
+  var rn=document.getElementById('ringNum');
+  rn.innerHTML=res.pct+'%<small>score</small>';
+  rn.style.color=res.passed?'#10b981':'#ef4444';
+  var bd=document.getElementById('resBadge');
+  bd.textContent=res.passed?'PASSED':'FAILED';
+  bd.className='rbadge '+(res.passed?'rpass':'rfail');
+  document.getElementById('resMsg').textContent=
+    res.pct>=80?'Outstanding! Excellent preparation for the real exam.':
+    res.pct>=60?'Good effort! Focus on weak areas and keep pushing.':
+    res.pct>=50?'You passed - but there is room to improve. Keep studying!':
+    "Don't give up - review these topics and try again!";
+  setTimeout(function(){
+    document.getElementById('ringArc').style.strokeDashoffset=264-(res.pct/100)*264;
+    document.getElementById('ringArc').style.stroke=res.passed?'#10b981':'#ef4444';
+  },200);
+  document.getElementById('lbLabel').textContent=CL[res.course]||res.course;
+  loadResults(res.course,function(){
+    var data=getBy(res.course);
+    var medals=['1st','2nd','3rd'];
+    var lh=data.map(function(e,i){
+      var me=e.name.toLowerCase()===res.name.toLowerCase()&&e.course===res.course;
+      return '<div class="lb-row'+(me?' me':'')+'">'+
+        '<div class="lb-rank">'+(i<3?medals[i]:'#'+(i+1))+'</div>'+
+        '<div class="lb-name">'+e.name+(me?' <span style="font-size:10px;color:#3b82f6">(you)</span>':'')+'</div>'+
+        '<div class="lb-bar"><div class="lb-bar-f" style="width:'+e.pct+'%"></div></div>'+
+        '<div class="lb-pct" style="color:'+(e.passed?'#10b981':'#ef4444')+'">'+e.pct+'%</div>'+
+      '</div>';
+    }).join('');
+    document.getElementById('lbDiv').innerHTML=lh||'<p style="font-size:12px;color:#334155;text-align:center;padding:10px">No other results yet.</p>';
+    var L=['A','B','C','D'];
+    var rh=questions.map(function(q,i){
+      var ua=answers[i],ok=ua===q.a,sk=ua===undefined;
+      var sc=sk?'#f59e0b':ok?'#10b981':'#ef4444';
+      var sl=sk?'Skipped':ok?'Correct':'Wrong';
+      var col=TC[q.t]||'#94a3b8';
+      var rows=q.o.map(function(o,j){
+        var bg='#1a2235',bc='transparent',fc='#94a3b8';
+        if(j===q.a){bg='rgba(16,185,129,.1)';bc='#10b981';fc='#f1f5f9';}
+        if(j===ua&&j!==q.a){bg='rgba(239,68,68,.1)';bc='#ef4444';fc='#f1f5f9';}
+        return '<div class="rev-opt" style="background:'+bg+';border-color:'+bc+';color:'+fc+'"><span style="font-family:monospace;font-weight:700;flex-shrink:0">'+L[j]+'</span><span>'+o+'</span></div>';
+      }).join('');
+      return '<div class="rev-card" style="border-color:'+sc+'33">'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:7px">'+
+          '<span style="font-size:10px;font-weight:700;color:'+col+';text-transform:uppercase">'+q.t+'</span>'+
+          '<span style="font-size:11px;font-weight:600;color:'+sc+'">'+sl+'</span>'+
+        '</div>'+
+        '<div style="font-size:13px;line-height:1.6;margin-bottom:9px">'+q.q+'</div>'+rows+
+      '</div>';
+    }).join('');
+    document.getElementById('revDiv').innerHTML=rh;
+  });
+}
+
+// ── ADMIN DASHBOARD ─────────────────────────────────────────────
+function admLoad(f){
+  admCurFilter=f;
+  document.getElementById('admSum').innerHTML='<div style="grid-column:span 2;color:#475569;font-size:13px;padding:8px">&#x1F504; Loading...</div>';
+  document.getElementById('admTbl').innerHTML='<div style="padding:20px;text-align:center;color:#475569;font-size:13px">&#x1F504; Fetching results...</div>';
+  loadResults(f,function(){
+    buildAdmSummary();
+    buildAdmTable(f);
+    var now=new Date();
+    document.getElementById('refreshTime').textContent='Updated: '+now.toLocaleTimeString();
+    if(admRefInt)clearInterval(admRefInt);
+    admRefInt=setInterval(function(){admRefresh();},30000);
+  });
+}
+
+function admRefresh(){
+  loadResults(admCurFilter,function(){
+    buildAdmSummary();
+    buildAdmTable(admCurFilter);
+    document.getElementById('refreshTime').textContent='Updated: '+new Date().toLocaleTimeString();
+  });
+}
+
+function admFilter(f){
+  admCurFilter=f;
+  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.toggle('on',b.dataset.f===f);});
+  buildAdmTable(f);
+}
+
+function buildAdmSummary(){
+  var tot=allResults.length;
+  var pass=allResults.filter(function(r){return r.passed;}).length;
+  var avg=tot>0?Math.round(allResults.reduce(function(s,r){return s+r.pct;},0)/tot):0;
+  var n114=allResults.filter(function(r){return r.course==='DSSN114';}).length;
+  var n112=allResults.filter(function(r){return r.course==='DSSN112';}).length;
+  var n116=allResults.filter(function(r){return r.course==='DSGN116';}).length;
+  document.getElementById('admSum').innerHTML=
+    '<div class="sum-card"><div class="sum-v" style="color:#3b82f6">'+tot+'</div><div class="sum-l">Total attempts</div></div>'+
+    '<div class="sum-card"><div class="sum-v" style="color:#10b981">'+pass+'</div><div class="sum-l">Passed</div></div>'+
+    '<div class="sum-card"><div class="sum-v" style="color:#f59e0b">'+avg+'%</div><div class="sum-l">Average score</div></div>'+
+    '<div class="sum-card"><div style="font-size:13px;font-weight:600"><span style="color:#60a5fa">114:</span> '+n114+' <span style="color:#34d399">112:</span> '+n112+' <span style="color:#fb7185">116:</span> '+n116+'</div><div class="sum-l">Per paper</div></div>';
+}
+
+function buildAdmTable(f){
+  var rows=getBy(f);
+  var cc={DSSN114:{bg:'rgba(59,130,246,.12)',tx:'#60a5fa'},DSSN112:{bg:'rgba(16,185,129,.12)',tx:'#34d399'},DSGN116:{bg:'rgba(244,63,94,.12)',tx:'#fb7185'}};
+  function fmt(s){var m=Math.floor(s/60),sc=s%60;return m+'m '+String(sc).padStart(2,'0')+'s';}
+  var medals=['1st','2nd','3rd'];
+  var h=rows.length===0?'<div style="padding:20px;text-align:center;color:#475569;font-size:13px">No results yet.</div>':'';
+  rows.forEach(function(r,i){
+    var c=cc[r.course]||{bg:'#1a2235',tx:'#94a3b8'};
+    var lbl=r.course.slice(0,4)+' '+r.course.slice(4);
+    h+='<div class="tr">'+
+      '<div style="font-size:11px;text-align:center;font-weight:700">'+(i<3?medals[i]:'#'+(i+1))+'</div>'+
+      '<div style="font-size:12px;font-weight:500">'+r.name+'</div>'+
+      '<div><span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px;background:'+c.bg+';color:'+c.tx+'">'+lbl+'</span></div>'+
+      '<div style="font-family:monospace;font-size:12px;font-weight:700;text-align:center;color:'+(r.passed?'#10b981':'#ef4444')+'">'+r.pct+'%<div style="font-size:9px;color:#475569">'+r.correct+'/'+r.total+'</div></div>'+
+      '<div style="font-size:10px;font-weight:700;text-align:center;color:'+(r.passed?'#10b981':'#ef4444')+'">'+(r.passed?'PASS':'FAIL')+'</div>'+
+      '<div class="tt" style="font-size:10px;color:#475569;font-family:monospace">'+fmt(r.timeTaken||0)+'</div>'+
+    '</div>';
+  });
+  document.getElementById('admTbl').innerHTML=h;
+}
+
+function admOut(){
+  if(admRefInt){clearInterval(admRefInt);admRefInt=null;}
+  role='';
+  document.getElementById('rb_s').classList.remove('picked');
+  document.getElementById('rb_a').classList.remove('picked');
+  document.getElementById('cont1').disabled=true;
+  show('s1');
+}
+
+// ── WATERMARK ───────────────────────────────────────────────────
+function makeWM(name,elId){
+  var el=document.getElementById(elId);
+  if(!el)return;
+  el.innerHTML='';
+  var txt=name+' \u2022 GREAT MINDS \u2022 '+name+' \u2022 GREAT MINDS \u2022 ';
+  for(var row=0;row<18;row++){
+    for(var col=0;col<5;col++){
+      var s=document.createElement('span');
+      s.className='wm-txt';
+      s.textContent=txt;
+      s.style.top=(row*110+(col%2===0?0:55))+'px';
+      s.style.left=(col*280-60)+'px';
+      el.appendChild(s);
+    }
+  }
+}
+
+// ── INIT ────────────────────────────────────────────────────────
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('s2').classList.contains('on'))doLogin();
+});
+document.addEventListener('contextmenu',function(e){
+  if(document.getElementById('s3').classList.contains('on')||document.getElementById('s4').classList.contains('on'))e.preventDefault();
+});
+
+// Pre-load settings from localStorage on startup
+loadSettingsFromLocal();
+// Show home screen
+show('s1');
+</script>
+</body>
+</html>
